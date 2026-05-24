@@ -1,0 +1,11 @@
+{
+  "name": "media-processor",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "TMPDIR=${TMPDIR:-$(pwd)/target/tmp} && mkdir -p \"$TMPDIR\" && TMPDIR=\"$TMPDIR\" cargo build --release",
+    "dev": "bash scripts/dev.sh",
+    "lint": "cargo clippy",
+    "test": "cargo test"
+  }
+}

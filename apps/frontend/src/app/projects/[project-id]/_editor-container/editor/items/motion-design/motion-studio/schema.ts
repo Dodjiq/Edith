@@ -1,0 +1,147 @@
+export type PrimitiveField =
+  | { kind: "text"; key: string; label: string; placeholder?: string }
+  | { kind: "textarea"; key: string; label: string; rows?: number }
+  | { kind: "number"; key: string; label: string; min?: number; max?: number }
+  | { kind: "color"; key: string; label: string }
+  | { kind: "image"; key: string; label: string; placeholder?: string }
+  | { kind: "switch"; key: string; label: string }
+  | {
+      kind: "select";
+      key: string;
+      label: string;
+      options: { value: string; label: string }[];
+    }
+  | {
+      /**
+       * Curated icon picker with a custom-upload fallback. Stores the
+       * selected preset key under `key` and the uploaded/pasted URL
+       * under `customKey` on the same props object. Render priority is
+       * always custom > preset > composition default — selecting a
+       * preset clears `customKey`, uploading clears `key`.
+       *
+       * `presetSet` identifies which preset bundle to draw thumbnails
+       * from (today only "macos" is implemented). The inspector reads
+       * the actual list from the composition module, so additions to
+       * the icon-presets file flow through automatically.
+       */
+      kind: "iconPreset";
+      key: string;
+      customKey: string;
+      label: string;
+      presetSet: "macos";
+    };
+
+export type ShapeField =
+  | { kind: "chat"; key: string; label: string }
+  | { kind: "scenario"; key: string; label: string }
+  | { kind: "composition"; key: string; label: string; exclude?: string[] }
+  | {
+      kind: "slots";
+      key: string;
+      label: string;
+      layoutKey: string;
+      counts: Record<string, number>;
+      exclude?: string[];
+    }
+  | {
+      // Renders the editor for whatever composition is selected at
+      // `compositionKey`, merged on top of that composition's defaultProps.
+      // Used by wrappers like PhoneFrame / LaptopFrame so the inner
+      // composition's fields show up in the inspector instead of being
+      // locked behind JSON-only editing.
+      kind: "innerProps";
+      key: string;
+      label: string;
+      compositionKey: string;
+    }
+  | {
+      kind: "imageList";
+      key: string;
+      label: string;
+      itemLabel?: string;
+      max?: number;
+    }
+  | {
+      kind: "terminalLines";
+      key: string;
+      label: string;
+    };
+
+// A collapsible section that groups primitive fields under a label.
+// Renders as an accordion at the bottom of the inspector.
+export type SectionField = {
+  kind: "section";
+  key: string;
+  label: string;
+  description?: string;
+  defaultOpen?: boolean;
+  fields: PrimitiveField[];
+};
+
+export type Field = PrimitiveField | ShapeField | SectionField;
+
+// Re-derived from props at studio/render time. Same shape as
+// Remotion's CalculateMetadataFunction return — kept inlined to
+// avoid a hard remotion type dep in the schema module.
+export type CalculatedMetadata = {
+  durationInFrames?: number;
+  fps?: number;
+  width?: number;
+  height?: number;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  props?: any;
+};
+
+/**
+ * brandMode controls whether a composition inherits the project Brand Kit:
+ *   - "branded" (default): accent / background / font fall back to the brand
+ *     when the per-clip prop is omitted or empty.
+ *   - "locked": the composition impersonates a real product (Twitter,
+ *     WhatsApp, Slack, Discord, iMessage, etc.) and ignores the brand kit
+ *     to keep the look authentic.
+ */
+export type BrandMode = "branded" | "locked";
+
+/**
+ * How a composition fits inside PhoneFrame's screen when nested.
+ *   - "width" (default): fit-to-width with vertical centering. Landscape
+ *     compositions (Browser, charts, text) render as a horizontal band
+ *     inside the phone screen with the screen background showing above
+ *     and below.
+ *   - "cover": cover-fit (Math.max). Use for compositions that internally
+ *     render portrait content sized to the phone aspect (the chat demos
+ *     in portrait orientation). PhoneFrame provides SafeAreaContext only
+ *     in this mode since the inner composition fills the screen.
+ *   - "contain": contain-fit (Math.min). Use when the whole composition
+ *     should be visible regardless of aspect, with letterbox on both axes.
+ */
+export type PhoneFitMode = "cover" | "width" | "contain";
+
+export type CompositionInfo<P extends Record<string, unknown>> = {
+  id: string;
+  title: string;
+  description: string;
+  durationInFrames: number;
+  fps: number;
+  width: number;
+  height: number;
+  defaultProps: P;
+  fields: Field[];
+  brandMode?: BrandMode;
+  phoneFitMode?: PhoneFitMode;
+  // Optional callback Remotion runs at studio load + every prop edit.
+  // Use this to recompute durationInFrames (or any metadata) from
+  // current props — e.g. GaiaScenario derives its length from the
+  // active scenarioJson so the timeline card hugs the actual content.
+  calculateMetadata?: (args: {
+    props: P;
+  }) => CalculatedMetadata | Promise<CalculatedMetadata>;
+};
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type AnyCompositionInfo = CompositionInfo<any>;
+
+export type EditorProps<T> = {
+  value: T;
+  onChange: (next: T) => void;
+};

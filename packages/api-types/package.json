@@ -1,0 +1,21 @@
+{
+  "name": "api-types",
+  "version": "1.0.0",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "dependencies": {
+    "@ts-rest/core": "^3.52.1",
+    "typescript": "^6.0.3",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^25.8.0"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  }
+}

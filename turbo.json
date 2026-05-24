@@ -1,0 +1,14 @@
+{
+    "$schema": "https://turbo.build/schema.json",
+    "globalPassThroughEnv": ["PORTLESS", "PORTLESS_PORT", "PORTLESS_STATE_DIR"],
+    "tasks": {
+        "build": {
+            "dependsOn": ["^build"],
+            "outputs": [".next/**", "!.next/cache/**", "dist/**", "target/release/**"]
+        },
+        "dev": {
+            "cache": false,
+            "persistent": true
+        }
+    }
+}

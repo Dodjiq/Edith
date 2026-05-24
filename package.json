@@ -1,0 +1,39 @@
+{
+  "name": "framedeck",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AI-powered video editor monorepo.",
+  "main": "index.js",
+  "packageManager": "pnpm@10.22.0",
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "dev:direct": "PORTLESS=0 turbo run dev",
+    "portless:list": "portless list",
+    "portless:proxy": "portless proxy start",
+    "test": "pnpm --filter server exec jest --runInBand && pnpm --filter media-processor test",
+    "typecheck": "pnpm --filter api-types build && pnpm --filter frontend exec tsc && pnpm --filter server exec tsc"
+  },
+  "keywords": [
+    "ai",
+    "video-editor",
+    "nextjs",
+    "nestjs"
+  ],
+  "author": "Kevin Rousseau",
+  "pnpm": {
+    "overrides": {
+      "react-router": "7.12.0",
+      "socket.io-parser": "4.2.6",
+      "path-to-regexp": "8.4.0",
+      "picomatch@<2.3.2": "2.3.2",
+      "picomatch@>=4.0.0 <4.0.4": "4.0.4"
+    }
+  },
+  "devDependencies": {
+    "portless": "^0.13.0",
+    "prettier": "^3.8.3",
+    "prettier-plugin-tailwindcss": "^0.8.0",
+    "turbo": "^2.9.14"
+  }
+}

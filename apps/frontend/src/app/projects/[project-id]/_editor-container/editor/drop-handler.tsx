@@ -1,0 +1,157 @@
+import {PlayerRef} from '@remotion/player';
+import React, {useCallback, useContext, useMemo} from 'react';
+import {AbsoluteFill} from 'remotion';
+import {addAsset, DropPosition} from './assets/add-asset';
+import {CANVAS_PADDING} from './canvas/canvas';
+import {CanvasSizeContext} from './canvas/canvas-size';
+import {
+	FEATURE_DROP_ASSETS_ON_CANVAS,
+	FEATURE_DROP_ASSETS_ON_TIMELINE,
+} from './flags';
+import {addLibraryAssetToTimelineWithItem} from './library/add-library-asset-to-timeline';
+import {LIBRARY_ASSET_DRAG_TYPE} from './sidebar-panel/assets-panel';
+import {PreviewSizeContext} from './preview-size';
+import {calculateScale} from './utils/calculate-canvas-transformation';
+import {useCurrentStateAsRef, useWriteContext} from './utils/use-context';
+import {useProjectId} from './utils/use-project-id';
+
+export const DropHandler: React.FC<{
+	children: React.ReactNode;
+	playerRef: React.RefObject<PlayerRef | null>;
+	compositionHeight: number;
+	compositionWidth: number;
+	context: 'canvas' | 'timeline';
+}> = ({children, playerRef, compositionHeight, compositionWidth, context}) => {
+	const size = useContext(CanvasSizeContext);
+	const {size: previewSize} = useContext(PreviewSizeContext);
+	const timelineWriteContext = useWriteContext();
+	const stateAsRef = useCurrentStateAsRef();
+	const projectId = useProjectId();
+
+	const onDragOver: React.DragEventHandler = useCallback(
+		(e) => {
+			if (!FEATURE_DROP_ASSETS_ON_TIMELINE && context === 'timeline') {
+				return;
+			}
+
+			if (!FEATURE_DROP_ASSETS_ON_CANVAS && context === 'canvas') {
+				return;
+			}
+			e.preventDefault();
+			e.stopPropagation();
+			e.dataTransfer.dropEffect = 'copy';
+		},
+		[context],
+	);
+
+	const onDrop: React.DragEventHandler = useCallback(
+		async (e) => {
+			if (!FEATURE_DROP_ASSETS_ON_TIMELINE && context === 'timeline') {
+				return;
+			}
+
+			if (!FEATURE_DROP_ASSETS_ON_CANVAS && context === 'canvas') {
+				return;
+			}
+			e.preventDefault();
+
+			const {current} = playerRef;
+			if (!current) {
+				throw new Error('playerRef is null');
+			}
+
+			const state = stateAsRef.current;
+			const tracks = state.undoableState.tracks;
+			const fps = state.undoableState.fps;
+
+			// Check if this is a library asset drop
+			const libraryAssetId = e.dataTransfer.getData(LIBRARY_ASSET_DRAG_TYPE);
+			if (libraryAssetId) {
+					const asset = state.undoableState.libraryAssets[libraryAssetId];
+					if (asset) {
+						addLibraryAssetToTimelineWithItem({
+							assetId: asset.id,
+							timelineWriteContext,
+							playerRef,
+						});
+					}
+					e.dataTransfer.clearData();
+					return;
+				}
+
+			// Handle file drops (original behavior)
+			let dropPosition: DropPosition | null = null;
+			if (context === 'canvas') {
+				const containerNode = current.getContainerNode();
+				if (!containerNode) {
+					throw new Error('containerNode is null');
+				}
+
+				const playerRect = containerNode.getBoundingClientRect();
+				if (!size) {
+					throw new Error('size is null');
+				}
+
+				const scale = calculateScale({
+					canvasSize: size,
+					compositionHeight,
+					compositionWidth,
+					previewSize: previewSize.size,
+				});
+				const dropPositionX = Math.round((e.clientX - playerRect.left) / scale);
+				const dropPositionY = Math.round((e.clientY - playerRect.top) / scale);
+				dropPosition = {x: dropPositionX, y: dropPositionY};
+			} else {
+				dropPosition = null;
+			}
+
+			const uploadPromises = [];
+			for (const file of e.dataTransfer.files) {
+				uploadPromises.push(
+					addAsset({
+						file,
+						compositionHeight,
+						compositionWidth,
+						tracks: tracks,
+						fps,
+						timelineWriteContext: timelineWriteContext,
+						playerRef,
+						dropPosition,
+						filename: file.name,
+						projectId,
+					}),
+				);
+			}
+			await Promise.all(uploadPromises);
+
+			e.dataTransfer.clearData();
+		},
+		[
+			compositionHeight,
+			compositionWidth,
+			context,
+			playerRef,
+			previewSize.size,
+			projectId,
+			size,
+			timelineWriteContext,
+			stateAsRef,
+		],
+	);
+
+	const style = useMemo(() => {
+		if (context === 'canvas') {
+			return {
+				padding: CANVAS_PADDING,
+			};
+		}
+
+		return {};
+	}, [context]);
+
+	return (
+		<AbsoluteFill onDragOver={onDragOver} onDrop={onDrop} style={style}>
+			{children}
+		</AbsoluteFill>
+	);
+};

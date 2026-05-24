@@ -1,0 +1,3 @@
+export const DEFAULT_NOISE_THRESHOLD = -28;
+export const DEFAULT_MIN_DURATION = 0.35;
+export const DEFAULT_PADDING_SECONDS = 0.2;

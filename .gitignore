@@ -1,0 +1,45 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Environment files
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+*.local
+
+# Build outputs and caches
+.turbo/
+**/.turbo/
+.next/
+**/.next/
+dist/
+**/dist/
+out/
+**/out/
+target/
+**/target/
+coverage/
+**/coverage/
+*.tsbuildinfo
+
+# Local runtime data
+apps/server/data/
+apps/server/temporary-files/
+temporary-files/
+*.log
+
+# Local tool and editor state
+.DS_Store
+.playwright-mcp/
+.claude/
+.codex/
+.agents/
+.cursor/
+.cursorignore
+.cursor/skills/
+.cursor/rules/
+.vscode/

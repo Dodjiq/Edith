@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {   
+        "esModuleInterop": true,
+        "forceConsistentCasingInFileNames": true,
+        "isolatedModules": true,
+        "module": "commonjs", // required for Nest.js
+        "skipLibCheck": true,
+        "strict": true,
+        "rootDir": "src",
+        "outDir": "dist",
+        "types": ["node"],
+        "declaration": true
+    },
+    "exclude": ["node_modules", "./dist/**/*"]
+}

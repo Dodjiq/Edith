@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "skills": {
+    "ai-elements": {
+      "source": "vercel/ai-elements",
+      "sourceType": "github",
+      "computedHash": "84f3a2a57fa71ae5061786280987575d673792d6dda9a63941efb2795b83543a"
+    },
+    "ai-gateway": {
+      "source": "vercel/vercel-plugin",
+      "sourceType": "github",
+      "skillPath": "skills/ai-gateway/SKILL.md",
+      "computedHash": "7e29de30c6a55cbd343ee4aabfa7b909a0b2daf1a0ca9a9e437ec8928d4cc801"
+    },
+    "create-design-system-rules": {
+      "source": "figma/mcp-server-guide",
+      "sourceType": "github",
+      "computedHash": "d6043b42474f54b855b0a0394032eb7443945adaa33893eac6d3968f94822d31"
+    },
+    "remotion-best-practices": {
+      "source": "remotion-dev/skills",
+      "sourceType": "github",
+      "computedHash": "9851afb52e1b892c43b2af973bda1776ce01fedfdfe704e0cfd70069a3a9c300"
+    },
+    "streamdown": {
+      "source": "vercel/streamdown",
+      "sourceType": "github",
+      "computedHash": "fb49b9edaf9d645d5fe56af9105050d7ae4765179d4996cb89efc049a7ecb000"
+    },
+    "vercel-react-best-practices": {
+      "source": "vercel-labs/agent-skills",
+      "sourceType": "github",
+      "computedHash": "afeca00ac2f492d88fdd010e73d91719a5b57c564bb4a73325b0bd77e11323ab"
+    }
+  }
+}
