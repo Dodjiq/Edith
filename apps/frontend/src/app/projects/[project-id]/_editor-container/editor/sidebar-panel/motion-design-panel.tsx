@@ -46,7 +46,7 @@ const MotionTemplateCardComponent: React.FC<MotionTemplateCardProps> = ({ templa
     type="button"
     onClick={() => onAdd(template)}
     aria-label={`Add ${template.label} motion design`}
-    className="group flex w-full gap-3 rounded-md border border-white/10 bg-white/3 p-2 text-left transition-colors hover:border-white/20 hover:bg-white/6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20"
+    className="group flex h-[104px] w-full gap-3 overflow-hidden rounded-md border border-white/10 bg-white/3 p-2 text-left transition-colors hover:border-white/20 hover:bg-white/6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20"
   >
     <MotionTemplatePreview template={template} />
     <div className="min-w-0 flex-1">
@@ -66,7 +66,9 @@ const MotionTemplateCard = React.memo(MotionTemplateCardComponent);
 
 MotionTemplateCard.displayName = 'MotionTemplateCard';
 
-const TEMPLATE_ROW_HEIGHT = 96;
+const TEMPLATE_CARD_HEIGHT = 104;
+const TEMPLATE_ROW_GAP = 10;
+const TEMPLATE_ROW_HEIGHT = TEMPLATE_CARD_HEIGHT + TEMPLATE_ROW_GAP;
 const TEMPLATE_OVERSCAN = 6;
 
 export const MotionDesignPanel: React.FC<MotionDesignPanelProps> = ({ playerRef }) => {
