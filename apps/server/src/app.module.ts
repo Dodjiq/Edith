@@ -7,11 +7,10 @@ import { RealtimeModule } from './realtime/realtime.module';
 import { ToolsModule } from './ai-gateway/tools/tools.module';
 import { AudioModule } from './audio/audio.module';
 import { CaptionsModule } from './captions/captions.module';
-import { SpeechmaticsModule } from './speechmatics/speechmatics.module';
+import { ElevenlabsModule } from './elevenlabs/elevenlabs.module';
 import { RequestLoggingMiddleware } from './common/middleware/request-logging.middleware';
 import { DevServerShutdownService } from './common/shutdown/dev-server-shutdown.service';
 import { PromptsService } from './prompts/prompts.service';
-import { ElevenlabsService } from './elevenlabs/elevenlabs.service';
 import { UploadController } from './upload/upload.controller';
 import { AwsService } from './aws/aws.service';
 import { UploadService } from './upload/upload.service';
@@ -26,7 +25,7 @@ import { RenderModule } from './render/render.module';
     ToolsModule,
     AudioModule,
     CaptionsModule,
-    SpeechmaticsModule,
+    ElevenlabsModule,
     ConfigModule.forRoot({
       isGlobal: true,
     }),
@@ -37,7 +36,6 @@ import { RenderModule } from './render/render.module';
     AppService,
     DevServerShutdownService,
     PromptsService,
-    ElevenlabsService,
     AwsService,
     UploadService,
     TwelveLabsService,

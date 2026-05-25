@@ -174,6 +174,8 @@ export type SilenceDetectionSummary = {
 };
 
 export type RemoveSilencesDetections = Record<string, SilenceDetectionSummary>;
+export const removeSilencesDetectionModes = ['auto', 'transcription', 'audio'] as const;
+export type RemoveSilencesDetectionMode = (typeof removeSilencesDetectionModes)[number];
 
 export type EditorSelectTimelineItemsPayload = {
   tool_name: typeof editorToolNames.selectTimelineItems;
@@ -227,9 +229,11 @@ export type EditorRemoveSilencesPayload = {
   tool_name: typeof editorToolNames.removeSilences;
   params: {
     targetItemId?: string;
+    itemIds?: string[];
     noiseThresholdInDecibels?: number;
     minDurationInSeconds?: number;
     paddingInSeconds?: number;
+    detectionMode?: RemoveSilencesDetectionMode;
     detectionsByItemId?: RemoveSilencesDetections;
   };
   toolCallId?: string;
@@ -565,6 +569,7 @@ export type TranscriptionWord = {
   startFrame: number;
   endFrame: number;
   trackId: string;
+  confidence?: number | null;
 };
 
 export type EditorRealtimePayload =
@@ -602,6 +607,22 @@ export type UploadProgressPayload = {
 };
 
 /** Payload for transcription complete WebSocket messages */
+export type TranscriptionMetadata = {
+  provider: 'elevenlabs';
+  modelId: 'scribe_v2';
+  generatedAt: string;
+  wordCount: number;
+  fullText?: string;
+  languageCode?: string;
+  languageProbability?: number;
+  audioDurationSeconds?: number;
+  transcriptionId?: string;
+  averageConfidence?: number | null;
+  speakerIds?: string[];
+  audioEventCount?: number;
+  generalization?: string;
+};
+
 export type TranscriptionCompletePayload = {
   assetId: string;
   transcription: {
@@ -611,6 +632,7 @@ export type TranscriptionCompletePayload = {
     timestampMs: number | null;
     confidence: number | null;
   }[];
+  metadata?: TranscriptionMetadata;
   /**
    * True when the asset was successfully processed but contains no speech to transcribe.
    * Different from error - the asset simply has no spoken content (e.g., music-only video).

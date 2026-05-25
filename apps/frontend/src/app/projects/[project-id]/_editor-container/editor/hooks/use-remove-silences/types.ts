@@ -1,4 +1,4 @@
-import { DetectSilenceResponse } from 'api-types';
+import { DetectSilenceResponse, RemoveSilencesDetectionMode } from 'api-types';
 import { AudioItem } from '../../items/audio/audio-item-type';
 import { VideoItem } from '../../items/video/video-item-type';
 
@@ -19,9 +19,11 @@ export type RemovedSegment = {
 
 export type RemoveSilenceOptions = {
   targetItemId?: string;
+  itemIds?: string[];
   noiseThresholdInDecibels?: number;
   minDurationInSeconds?: number;
   paddingInSeconds?: number;
+  detectionMode?: RemoveSilencesDetectionMode;
   toolCallId?: string;
   detectionsByItemId?: Record<string, DetectSilenceResponse>;
 };

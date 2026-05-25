@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
 import { AwsService } from '../aws/aws.service';
 import { RealtimeService } from '../realtime/realtime.service';
-import { SpeechmaticsService } from '../speechmatics/speechmatics.service';
+import { ElevenlabsService } from '../elevenlabs/elevenlabs.service';
 import { VideoAnalysisService } from '../video-analysis/video-analysis.service';
 import { UploadService } from './upload.service';
 
@@ -28,7 +28,7 @@ describe('UploadService', () => {
           useValue: {},
         },
         {
-          provide: SpeechmaticsService,
+          provide: ElevenlabsService,
           useValue: {},
         },
         {

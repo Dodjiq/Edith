@@ -1,4 +1,5 @@
 import { Caption } from '@remotion/captions';
+import type { TranscriptionMetadata } from 'api-types';
 import { AudioAsset, VideoAsset } from '../../assets/assets';
 import { EditorState } from '../types';
 
@@ -14,10 +15,12 @@ export const setAssetTranscription = ({
   state,
   assetId,
   transcription,
+  metadata,
 }: {
   state: EditorState;
   assetId: string;
   transcription: Caption[];
+  metadata?: TranscriptionMetadata;
 }): EditorState => {
   const existingAsset = state.undoableState.assets[assetId] ?? state.undoableState.libraryAssets[assetId];
 
@@ -34,6 +37,7 @@ export const setAssetTranscription = ({
   const updatedAsset: VideoAsset | AudioAsset = {
     ...existingAsset,
     transcription,
+    ...(metadata ? { transcriptionMetadata: metadata } : {}),
   };
 
   // Update in assets if present there

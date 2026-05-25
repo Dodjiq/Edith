@@ -12,7 +12,7 @@ import { useSilentTranscriptionStore } from '../state/silent-transcription-store
  * Hook that listens for WebSocket transcription complete events and updates asset state.
  *
  * When a video/audio file is uploaded via direct S3 upload, transcription is processed
- * asynchronously by the Rust media processor using Speechmatics Batch API.
+ * asynchronously through ElevenLabs Scribe v2, with Rust audio extraction for videos.
  * The result is delivered via WebSocket to this listener.
  *
  * Note: We don't validate against current assets state here because:
@@ -44,7 +44,12 @@ export const useTranscriptionListener = (): void => {
           // Mark as uploaded, with hasNoTranscription flag if applicable
           setState({
             update: (state) =>
-              finishUploadWithoutTranscription({ state, assetId: payload.assetId, hasNoTranscription }),
+              finishUploadWithoutTranscription({
+                state,
+                assetId: payload.assetId,
+                hasNoTranscription,
+                metadata: payload.metadata,
+              }),
             commitToUndoStack: false,
           });
           return;
@@ -66,7 +71,12 @@ export const useTranscriptionListener = (): void => {
             text: index === 0 ? caption.text : ` ${caption.text}`,
           }));
 
-        console.debug('[TranscriptionListener] Received transcription for asset:', payload.assetId, 'words:', captions.length);
+        console.debug(
+          '[TranscriptionListener] Received transcription for asset:',
+          payload.assetId,
+          'words:',
+          captions.length,
+        );
 
         setState({
           update: (state) =>
@@ -74,6 +84,7 @@ export const useTranscriptionListener = (): void => {
               state,
               assetId: payload.assetId,
               transcription: captions,
+              metadata: payload.metadata,
             }),
           commitToUndoStack: false,
         });

@@ -5,7 +5,7 @@ import type {
   EditorSetCaptionsPayload,
   RemoveSilencesDetections,
 } from 'api-types';
-import { editorToolNames, realtimeMessageTypes } from 'api-types';
+import { editorToolNames, realtimeMessageTypes, removeSilencesDetectionModes } from 'api-types';
 import { z } from 'zod';
 import { stripUrlsFromProjectState, mapToolResultStatus, extractErrorDetail } from './utils';
 import type {
@@ -22,40 +22,123 @@ const DEFAULT_NOISE_THRESHOLD = -28;
 const DEFAULT_MIN_DURATION = 0.35;
 const DEFAULT_PADDING = 0.2;
 
+const uniqueIds = (ids: (string | undefined)[]) =>
+  Array.from(new Set(ids.map((id) => id?.trim()).filter((id): id is string => Boolean(id))));
+
+const getAudioItemIdsFromProjectState = (projectState?: Record<string, unknown>) => {
+  const items = Array.isArray(projectState?.projectItemsInfo)
+    ? (projectState.projectItemsInfo as Record<string, unknown>[])
+    : [];
+  const audioItemIds = new Set(
+    items
+      .filter((item) => item.hasAudioTrack === true && typeof item.itemId === 'string')
+      .map((item) => item.itemId as string),
+  );
+  const tracksInfo = projectState?.tracksInfo as Record<string, unknown> | undefined;
+  const tracks = Array.isArray(tracksInfo?.tracks) ? (tracksInfo.tracks as Record<string, unknown>[]) : [];
+  const orderedIds = tracks.flatMap((track) =>
+    Array.isArray(track.itemsTracksIds) ? (track.itemsTracksIds as unknown[]) : [],
+  );
+  const orderedAudioItemIds = orderedIds.filter(
+    (id): id is string => typeof id === 'string' && audioItemIds.has(id),
+  );
+
+  return orderedAudioItemIds.length > 0 ? orderedAudioItemIds : Array.from(audioItemIds);
+};
+
+const buildRemoveSilencesModelOutput = (output: RemoveSilencesResult) => {
+  const targetIds = output.targetItemIds ?? (output.targetItemId ? [output.targetItemId] : []);
+  const data = output.output ?? {};
+  const requestedItemIds = Array.isArray(data.requestedItemIds) ? data.requestedItemIds : targetIds;
+  const processedItemIds = Array.isArray(data.processedItemIds) ? data.processedItemIds : [];
+  const skippedItemIds = Array.isArray(data.skippedItemIds) ? data.skippedItemIds : [];
+  const createdItemIds = Array.isArray(data.createdItemIds) ? data.createdItemIds : [];
+  const removedCount = typeof data.removedCount === 'number' ? data.removedCount : 0;
+  const removedDurationSeconds =
+    typeof data.removedDurationSeconds === 'number' ? data.removedDurationSeconds.toFixed(2) : '0.00';
+  const detectionSourceCounts =
+    data.detectionSourceCounts && typeof data.detectionSourceCounts === 'object'
+      ? JSON.stringify(data.detectionSourceCounts)
+      : 'unknown';
+  const timelineGapSummary =
+    data.timelineGapSummary && typeof data.timelineGapSummary === 'object'
+      ? (data.timelineGapSummary as Record<string, unknown>)
+      : undefined;
+  const timelineGapCount =
+    typeof timelineGapSummary?.gapCount === 'number' ? timelineGapSummary.gapCount : undefined;
+  const timelineGapSeconds =
+    typeof timelineGapSummary?.totalGapSeconds === 'number'
+      ? timelineGapSummary.totalGapSeconds.toFixed(2)
+      : undefined;
+  const currentAudioItemIds = getAudioItemIdsFromProjectState(output.projectState).slice(0, 40);
+
+  return {
+    type: 'text' as const,
+    value: [
+      `remove_silences status=${output.status}`,
+      `requestedItemIds=${requestedItemIds.join(', ') || 'selected item(s)'}`,
+      `processedItemIds=${processedItemIds.join(', ') || 'none'}`,
+      `skippedItemIds=${skippedItemIds.join(', ') || 'none'}`,
+      `createdItemIds=${createdItemIds.join(', ') || 'none'}`,
+      `removed=${removedCount} gap(s), ${removedDurationSeconds}s`,
+      `detectionSources=${detectionSourceCounts}`,
+      timelineGapCount === undefined
+        ? undefined
+        : timelineGapCount > 0
+          ? `timelineGaps=WARNING ${timelineGapCount} gap(s), ${timelineGapSeconds}s remain`
+          : 'timelineGaps=none',
+      currentAudioItemIds.length ? `currentAudioItemIds=${currentAudioItemIds.join(', ')}` : undefined,
+      output.note ? `note=${output.note}` : undefined,
+      output.error ? `error=${output.error}` : undefined,
+    ]
+      .filter(Boolean)
+      .join('\n'),
+  };
+};
+
 export function createRemoveSilencesTool(
   deps: ActionToolDependencies,
   context?: ToolsContext,
 ): Tool<RemoveSilencesInput, RemoveSilencesResult> {
   const description = [
-    'Remove silences from one selected audio-capable timeline item (video or audio only).',
-    'Use after selecting exactly one valid item; do not batch across multiple timeline items.',
+    'Remove speech pauses/silences from audio-capable timeline items (video or audio).',
+    'RIGHT TOOL for user wording like: remove silences, cut pauses, tighten pacing, make the talking-head video smoother.',
+    'BATCH SUPPORT: pass itemIds with all target video/audio item IDs in one call. Prefer one batched call over selecting items one by one.',
+    'After transcript-based bad-take cuts create many clips, pass every remaining audio/video itemId from the latest project state to itemIds.',
+    'Use detectionMode="auto" by default: the editor uses cached transcription word timings first, then audio waveform detection only when needed.',
+    'Use detectionMode="audio" only when transcript timing is unavailable or clearly stale.',
+    'The operation ripple-deletes removed spans; if the result reports timeline gaps remaining, inspect/correct before claiming completion.',
     'Optionally pass noise threshold, minimum duration, and padding seconds to customize detection.',
-    'Prefer using default expect if you have a specific reason for customizing.',
-    'If many items, you must use the tools on each item individually.',
-    'Only apply on item that have an audio track and a transcription.',
+    'Prefer defaults unless the user asks for a more/less aggressive cut.',
   ].join(' ');
 
   const inputSchema = z.object({
     itemId: z.string().trim().min(1, 'Provide the single target item ID').optional(),
-    noiseThresholdInDecibels: z.number().optional(),
-    minDurationInSeconds: z.number().optional(),
-    paddingInSeconds: z.number().optional(),
+    itemIds: z.array(z.string().trim().min(1)).optional(),
+    noiseThresholdInDecibels: z.number().optional().describe('Audio fallback threshold. Default -28 dB.'),
+    minDurationInSeconds: z.number().optional().describe('Minimum pause length to remove. Default 0.35s.'),
+    paddingInSeconds: z
+      .number()
+      .optional()
+      .describe('Speech padding preserved around each cut. Default 0.2s.'),
+    detectionMode: z.enum(removeSilencesDetectionModes).optional(),
     reason: z.string().trim().max(200).optional(),
   });
 
-  const resolveDetectionTargets = (targetItemId?: string) => {
+  const resolveTargetIds = (targetItemId?: string, targetItemIds?: string[]) => {
+    const explicitIds = uniqueIds([...(targetItemIds ?? []), targetItemId]);
+    if (explicitIds.length > 0) return explicitIds;
+
+    return context?.projectState?.selectedItemsInfo ?? [];
+  };
+
+  const resolveDetectionTargets = (targetIds: string[]) => {
     const state = context?.projectState;
     if (!state) return [] as { itemId: string; assetUrl: string }[];
 
     const itemsById = new Map(state.projectItemsInfo.map((item) => [item.itemId, item]));
-    const candidateIds =
-      targetItemId && targetItemId.trim().length > 0
-        ? [targetItemId.trim()]
-        : state.selectedItemsInfo.length > 0
-          ? state.selectedItemsInfo
-          : [];
 
-    return candidateIds
+    return targetIds
       .map((id) => itemsById.get(id))
       .filter((item): item is NonNullable<typeof item> => Boolean(item))
       .map((item) => {
@@ -76,14 +159,23 @@ export function createRemoveSilencesTool(
     minDuration: number;
   }): Promise<RemoveSilencesDetections> => {
     const detections: RemoveSilencesDetections = {};
+    const detectionsByAssetUrl = new Map<
+      string,
+      Awaited<ReturnType<typeof deps.audioService.detectSilence>>
+    >();
 
     for (const target of targets) {
       try {
-        const detection = await deps.audioService.detectSilence({
-          assetUrl: target.assetUrl,
-          noiseThresholdInDecibels: noiseThreshold,
-          minDurationInSeconds: minDuration,
-        });
+        const cachedDetection = detectionsByAssetUrl.get(target.assetUrl);
+        const detection =
+          cachedDetection ??
+          (await deps.audioService.detectSilence({
+            assetUrl: target.assetUrl,
+            noiseThresholdInDecibels: noiseThreshold,
+            minDurationInSeconds: minDuration,
+          }));
+
+        detectionsByAssetUrl.set(target.assetUrl, detection);
         detections[target.itemId] = detection;
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
@@ -100,21 +192,26 @@ export function createRemoveSilencesTool(
     execute: async (
       {
         itemId,
+        itemIds,
         noiseThresholdInDecibels,
         minDurationInSeconds,
         paddingInSeconds,
+        detectionMode,
         reason,
       }: RemoveSilencesInput,
       { toolCallId }: { toolCallId?: string },
     ) => {
       const trimmedItemId = itemId?.trim();
+      const resolvedTargetIds = resolveTargetIds(trimmedItemId, itemIds);
       const resolvedNoiseThreshold = noiseThresholdInDecibels ?? DEFAULT_NOISE_THRESHOLD;
       const resolvedMinDuration = minDurationInSeconds ?? DEFAULT_MIN_DURATION;
       const resolvedPadding = paddingInSeconds ?? DEFAULT_PADDING;
+      const resolvedDetectionMode = detectionMode ?? 'auto';
       const resolvedToolCallId = toolCallId ?? `remove-silences-${Date.now()}`;
       const waitForResult = deps.waitForToolResult(resolvedToolCallId);
 
-      const detectionTargets = resolveDetectionTargets(trimmedItemId);
+      const detectionTargets =
+        resolvedDetectionMode === 'transcription' ? [] : resolveDetectionTargets(resolvedTargetIds);
       const detectionsByItemId =
         detectionTargets.length > 0
           ? await detectSilencesForTargets({
@@ -125,10 +222,17 @@ export function createRemoveSilencesTool(
           : undefined;
 
       const params: EditorRemoveSilencesPayload['params'] = {
-        targetItemId: trimmedItemId && trimmedItemId.length > 0 ? trimmedItemId : undefined,
+        targetItemId:
+          resolvedTargetIds.length === 1
+            ? resolvedTargetIds[0]
+            : trimmedItemId && trimmedItemId.length > 0
+              ? trimmedItemId
+              : undefined,
+        itemIds: resolvedTargetIds.length > 0 ? resolvedTargetIds : undefined,
         noiseThresholdInDecibels: resolvedNoiseThreshold,
         minDurationInSeconds: resolvedMinDuration,
         paddingInSeconds: resolvedPadding,
+        detectionMode: resolvedDetectionMode,
         detectionsByItemId:
           detectionsByItemId && Object.keys(detectionsByItemId).length > 0 ? detectionsByItemId : undefined,
       };
@@ -150,6 +254,7 @@ export function createRemoveSilencesTool(
         return {
           status: 'timeout',
           targetItemId: params.targetItemId,
+          targetItemIds: params.itemIds,
           note: 'No response received from editor.',
         };
       }
@@ -176,11 +281,11 @@ export function createRemoveSilencesTool(
       return {
         status: mappedStatus,
         targetItemId: params.targetItemId,
+        targetItemIds: params.itemIds,
         note:
           mappedStatus === 'error'
             ? (errorDetail ?? 'Remove-silences request failed without details from the editor.')
-            : (reason ??
-              'Remove-silences request finished. Ensure a single audio or video item is selected before applying.'),
+            : (reason ?? 'Remove-silences request finished.'),
         output: Object.keys(mergedOutput).length > 0 ? mergedOutput : undefined,
         error: errorDetail,
         projectState: rawProjectState
@@ -188,6 +293,7 @@ export function createRemoveSilencesTool(
           : undefined,
       };
     },
+    toModelOutput: ({ output }: { output: RemoveSilencesResult }) => buildRemoveSilencesModelOutput(output),
   } as unknown as Tool<RemoveSilencesInput, RemoveSilencesResult>;
 }
 

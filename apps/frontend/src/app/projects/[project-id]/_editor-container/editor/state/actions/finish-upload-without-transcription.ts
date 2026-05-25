@@ -1,3 +1,4 @@
+import type { TranscriptionMetadata } from 'api-types';
 import { AudioAsset, EditorStarterAsset, VideoAsset } from '../../assets/assets';
 import { EditorState } from '../types';
 
@@ -15,23 +16,26 @@ export const finishUploadWithoutTranscription = ({
   state,
   assetId,
   hasNoTranscription = false,
+  metadata,
 }: {
   state: EditorState;
   assetId: string;
   hasNoTranscription?: boolean;
+  metadata?: TranscriptionMetadata;
 }): EditorState => {
   // If hasNoTranscription, update the asset to mark it
   let newAssets = state.undoableState.assets;
   let newLibraryAssets = state.undoableState.libraryAssets;
 
-  if (hasNoTranscription) {
+  if (hasNoTranscription || metadata) {
     const existingAsset: EditorStarterAsset | undefined =
       state.undoableState.assets[assetId] ?? state.undoableState.libraryAssets[assetId];
 
     if (existingAsset && (existingAsset.type === 'video' || existingAsset.type === 'audio')) {
       const updatedAsset: VideoAsset | AudioAsset = {
         ...existingAsset,
-        hasNoTranscription: true,
+        ...(hasNoTranscription ? { hasNoTranscription: true } : {}),
+        ...(metadata ? { transcriptionMetadata: metadata } : {}),
       };
 
       if (state.undoableState.assets[assetId]) {

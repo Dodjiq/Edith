@@ -15,7 +15,7 @@ NestJS 11 backend for Framedeck. It exposes the typed API, streams realtime edit
 - Stream chat responses and tool progress through the AI Gateway.
 - Coordinate editor tools such as timeline selection and silence removal.
 - Create, sign, complete, and abort S3 multipart uploads.
-- Start Speechmatics transcription and TwelveLabs video analysis after upload completion.
+- Start ElevenLabs Scribe v2 transcription and TwelveLabs video analysis after upload completion.
 - Push realtime status updates through Socket.IO.
 - Trigger and track Remotion Lambda renders.
 
@@ -55,8 +55,7 @@ Create `apps/server/.env` from `.env.example`.
 | `AI_GATEWAY_LOCAL_LOGS`     | Set to `true` to write local AI usage and full conversation logs            |
 | `OPENAI_API_KEY`            | OpenAI or compatible provider key                                          |
 | `OPENAI_BASE_URL`           | Optional OpenAI-compatible base URL                                        |
-| `ELEVENLABS_API_KEY`        | Voice generation API key                                                   |
-| `SPEECHMATICS_API_KEY`      | Transcription API key                                                      |
+| `ELEVENLABS_API_KEY`        | ElevenLabs API key for Scribe v2 transcription and voice generation         |
 | `DEEPGRAM_API_KEY`          | Deepgram API key                                                           |
 | `12LABS_API_KEY`            | TwelveLabs video analysis API key                                          |
 | `TWELVELABS_INDEX_NAME`     | Base index name for project-scoped TwelveLabs indexes                      |
@@ -90,11 +89,10 @@ src/
 ├── aws/              # S3 presigning and multipart helpers
 ├── captions/         # Caption generation and retrieval
 ├── deepgram/         # Deepgram integration
-├── elevenlabs/       # ElevenLabs integration
+├── elevenlabs/       # ElevenLabs Scribe v2 transcription and voice integration
 ├── messages/         # Chat message endpoints
 ├── realtime/         # Socket.IO gateway and event service
 ├── render/           # Remotion Lambda render endpoint
-├── speechmatics/     # Speechmatics transcription integration
 ├── upload/           # Upload lifecycle routes and background processing
 └── video-analysis/   # TwelveLabs indexing and prompt analysis
 ```
@@ -124,4 +122,4 @@ The server emits upload, transcription, video analysis, render, and editor-tool 
 4. `POST /uploads/:uploadId/complete`
 5. Server starts transcription and video analysis background jobs.
 
-For video transcription, the server calls the media processor to extract MP3 audio before sending it to Speechmatics.
+For video transcription, the server calls the media processor to extract MP3 audio before sending it to ElevenLabs Scribe v2.

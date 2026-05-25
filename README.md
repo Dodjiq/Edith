@@ -36,10 +36,10 @@ flowchart LR
   User["Editor user"] --> Frontend["Next.js frontend"]
   Frontend --> Api["Nest API"]
   Frontend --> S3["S3 multipart upload"]
-  Api --> Speechmatics["Speechmatics"]
+  Api --> ElevenLabs["ElevenLabs Scribe v2"]
   Api --> TwelveLabs["TwelveLabs"]
   Api --> Media["Rust media processor"]
-  Media --> Speechmatics
+  Media --> Api
   Api --> Realtime["Socket.IO events"]
   Realtime --> Frontend
   Frontend --> Render["Cloud video render"]
@@ -51,7 +51,7 @@ flowchart LR
 2. Frontend calls `POST /uploads/:uploadId/sign-parts` to sign upload chunks.
 3. Browser uploads directly to S3 with `directS3Upload()`.
 4. Frontend calls `POST /uploads/:uploadId/complete`.
-5. Server starts Speechmatics transcription and TwelveLabs video analysis in the background.
+5. Server starts ElevenLabs Scribe v2 transcription and TwelveLabs video analysis in the background.
 6. WebSocket events update the editor when transcription or video analysis finishes.
 
 Asset status flows through `pending-upload`, `uploading`, `transcribing`, `ready`, and `error`.
@@ -69,7 +69,7 @@ The chat assistant streams through the server-side AI Gateway. Tools from `Tools
 - Rust toolchain and Cargo
 - FFmpeg
 - AWS S3 credentials for uploads and cloud renders
-- API keys for the AI/media providers you use: OpenAI or compatible API, Speechmatics, TwelveLabs, Deepgram, ElevenLabs
+- API keys for the AI/media providers you use: OpenAI or compatible API, ElevenLabs, TwelveLabs, Deepgram
 
 > [!IMPORTANT]
 > Copy each app's `.env.example` into a local `.env` before running the full stack. The root does not own a single combined env file.
@@ -118,7 +118,7 @@ pnpm dev:direct
 ```text
 apps/
 ├── frontend/          # Next.js 16, React 19, Tailwind, shadcn, Zustand, video UI
-├── server/            # NestJS 11, AI SDK, Socket.IO, S3, Speechmatics, TwelveLabs
+├── server/            # NestJS 11, AI SDK, Socket.IO, S3, ElevenLabs Scribe v2, TwelveLabs
 └── media-processor/   # Rust/Axum, FFmpeg extraction service
 packages/
 └── api-types/         # Shared ts-rest contracts, Zod schemas, realtime constants

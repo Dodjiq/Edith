@@ -45,6 +45,52 @@ const getRemovedFrames = (ranges: FrameRangeInput[]) => {
   return ranges.reduce((sum, range) => sum + (range.endFrame - range.startFrame), 0);
 };
 
+const getAudioItemIdsFromProjectState = (projectState?: Record<string, unknown>) => {
+  const items = Array.isArray(projectState?.projectItemsInfo)
+    ? (projectState.projectItemsInfo as Record<string, unknown>[])
+    : [];
+  const audioItemIds = new Set(
+    items
+      .filter((item) => item.hasAudioTrack === true && typeof item.itemId === 'string')
+      .map((item) => item.itemId as string),
+  );
+  const tracksInfo = projectState?.tracksInfo as Record<string, unknown> | undefined;
+  const tracks = Array.isArray(tracksInfo?.tracks) ? (tracksInfo.tracks as Record<string, unknown>[]) : [];
+  const orderedIds = tracks.flatMap((track) =>
+    Array.isArray(track.itemsTracksIds) ? (track.itemsTracksIds as unknown[]) : [],
+  );
+  const orderedAudioItemIds = orderedIds.filter(
+    (id): id is string => typeof id === 'string' && audioItemIds.has(id),
+  );
+
+  return orderedAudioItemIds.length > 0 ? orderedAudioItemIds : Array.from(audioItemIds);
+};
+
+const buildCutModelOutput = (output: CutFrameRangeResult | CutTimeRangesResult) => {
+  const audioItemIds = getAudioItemIdsFromProjectState(output.projectState).slice(0, 40);
+  const removedSeconds =
+    'removedSeconds' in output && typeof output.removedSeconds === 'number'
+      ? output.removedSeconds.toFixed(2)
+      : output.removedFrames
+        ? `${output.removedFrames} frame(s)`
+        : 'unknown';
+
+  return {
+    type: 'text' as const,
+    value: [
+      `cut status=${output.status}`,
+      `trackId=${output.trackId}`,
+      `requestedRanges=${output.ranges.length}`,
+      `removed=${removedSeconds}`,
+      audioItemIds.length ? `currentAudioItemIds=${audioItemIds.join(', ')}` : undefined,
+      output.note ? `note=${output.note}` : undefined,
+      output.error ? `error=${output.error}` : undefined,
+    ]
+      .filter(Boolean)
+      .join('\n'),
+  };
+};
+
 const convertTimeRangesToFrameRanges = (ranges: TimeRangeInput[], fps: number): FrameRangeInput[] => {
   return normalizeFrameRanges(
     ranges.map((range) => {
@@ -118,10 +164,18 @@ export function createCutFrameRangeTool(
       ranges: z.array(frameRangeSchema).nonempty('At least one frame range is required'),
       reason: z.string().trim().max(500).optional(),
     }),
-    execute: async ({ trackId, ranges, reason }: CutFrameRangeInput, { toolCallId }: { toolCallId?: string }) => {
+    execute: async (
+      { trackId, ranges, reason }: CutFrameRangeInput,
+      { toolCallId }: { toolCallId?: string },
+    ) => {
       const invalidRanges = ranges.filter((range) => range.startFrame >= range.endFrame);
       if (invalidRanges.length > 0) {
-        return { status: 'skipped', trackId, ranges, note: 'Invalid range(s): startFrame must be less than endFrame.' };
+        return {
+          status: 'skipped',
+          trackId,
+          ranges,
+          note: 'Invalid range(s): startFrame must be less than endFrame.',
+        };
       }
 
       const normalizedRanges = normalizeFrameRanges(ranges);
@@ -134,7 +188,12 @@ export function createCutFrameRangeTool(
       });
 
       if ('status' in result && result.status === 'timeout') {
-        return { status: 'timeout', trackId: params.trackId, ranges: params.ranges, note: 'No response received from editor.' };
+        return {
+          status: 'timeout',
+          trackId: params.trackId,
+          ranges: params.ranges,
+          note: 'No response received from editor.',
+        };
       }
 
       const mappedStatus = mapToolResultStatus(result.status, {
@@ -164,10 +223,13 @@ export function createCutFrameRangeTool(
         trackId: params.trackId,
         ranges: params.ranges,
         removedFrames: totalRemovedFrames,
-        note: reason ?? `Cut ${totalRemovedFrames} frames across ${params.ranges.length} range(s), ripple-deleted gaps.`,
+        note:
+          reason ??
+          `Cut ${totalRemovedFrames} frames across ${params.ranges.length} range(s), ripple-deleted gaps.`,
         projectState: rawProjectState ? stripUrlsFromProjectState(rawProjectState) : undefined,
       };
     },
+    toModelOutput: ({ output }: { output: CutFrameRangeResult }) => buildCutModelOutput(output),
   } as unknown as Tool<CutFrameRangeInput, CutFrameRangeResult>;
 }
 
@@ -190,7 +252,10 @@ export function createCutTimeRangesTool(
       ranges: z.array(timeRangeSchema).nonempty('At least one time range is required'),
       reason: z.string().trim().max(500).optional(),
     }),
-    execute: async ({ trackId, ranges, reason }: CutTimeRangesInput, { toolCallId }: { toolCallId?: string }) => {
+    execute: async (
+      { trackId, ranges, reason }: CutTimeRangesInput,
+      { toolCallId }: { toolCallId?: string },
+    ) => {
       const fps = Number(context?.projectState?.fpsInfo);
       if (!Number.isFinite(fps) || fps <= 0) {
         return {
@@ -250,9 +315,11 @@ export function createCutTimeRangesTool(
 
       const removedFrames = getRemovedFrames(params.ranges);
       const removedSeconds = Number((removedFrames / fps).toFixed(3));
-      const mergedSummary = params.ranges.length === ranges.length
-        ? `${ranges.length} range(s)`
-        : `${ranges.length} requested range(s) merged into ${params.ranges.length} cut(s)`;
+      const mergedSummary =
+        params.ranges.length === ranges.length
+          ? `${ranges.length} range(s)`
+          : `${ranges.length} requested range(s) merged into ${params.ranges.length} cut(s)`;
+      const rawProjectState = result.output?.projectState as Record<string, unknown> | undefined;
 
       return {
         status: mappedStatus,
@@ -262,7 +329,9 @@ export function createCutTimeRangesTool(
         removedFrames,
         removedSeconds,
         note: reason ?? `Cut ${removedSeconds.toFixed(2)}s on the timeline using ${mergedSummary}.`,
+        projectState: rawProjectState ? stripUrlsFromProjectState(rawProjectState) : undefined,
       };
     },
+    toModelOutput: ({ output }: { output: CutTimeRangesResult }) => buildCutModelOutput(output),
   } as unknown as Tool<CutTimeRangesInput, CutTimeRangesResult>;
 }

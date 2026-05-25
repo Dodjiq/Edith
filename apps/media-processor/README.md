@@ -1,6 +1,6 @@
 # Framedeck Media Processor
 
-Internal Rust/Axum service for the Framedeck media pipeline. It extracts MP3 audio from uploaded video files with FFmpeg so the Nest server can send lighter audio payloads to Speechmatics.
+Internal Rust/Axum service for the Framedeck media pipeline. It extracts MP3 audio from uploaded video files with FFmpeg so the Nest server can send lighter audio payloads to ElevenLabs Scribe v2.
 
 ![Rust](https://img.shields.io/badge/Rust-2021-b7410e?style=flat-square&logo=rust)
 ![Axum](https://img.shields.io/badge/Axum-0.7-222?style=flat-square)
@@ -10,7 +10,7 @@ Internal Rust/Axum service for the Framedeck media pipeline. It extracts MP3 aud
 
 ## Overview
 
-The service exposes a small HTTP API used by `apps/server`. For video assets, the server passes a presigned S3 URL to this service, receives MP3 bytes back, then forwards the audio to Speechmatics.
+The service exposes a small HTTP API used by `apps/server`. For video assets, the server passes a presigned S3 URL to this service, receives MP3 bytes back, then forwards the audio to ElevenLabs Scribe v2.
 
 ```mermaid
 sequenceDiagram
@@ -18,14 +18,14 @@ sequenceDiagram
   participant Media as Media processor
   participant S3 as S3 video URL
   participant FFmpeg as FFmpeg
-  participant Speechmatics as Speechmatics
+  participant ElevenLabs as ElevenLabs Scribe v2
 
   Server->>Media: GET /extract-audio?url=...
   Media->>S3: Stream video
   Media->>FFmpeg: Extract MP3 audio
   FFmpeg-->>Media: MP3 bytes
   Media-->>Server: audio/mpeg
-  Server->>Speechmatics: Submit transcription job
+  Server->>ElevenLabs: Submit transcription job
 ```
 
 ## Getting started

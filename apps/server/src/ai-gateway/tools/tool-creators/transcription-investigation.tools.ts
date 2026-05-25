@@ -7,8 +7,15 @@ import {
   buildInvestigationPrompt,
   buildInvestigationSystemPrompt,
 } from '../../../prompts/subagents/transcription-investigation.prompts';
-import { createFindRepetitionCandidatesTool, repetitionCandidateToolName } from './repetition-candidate.tools';
-import { createGetDetailedTranscriptionTool, createGetItemsDataTool, createGetProjectStateTool } from './query.tools';
+import {
+  createFindRepetitionCandidatesTool,
+  repetitionCandidateToolName,
+} from './repetition-candidate.tools';
+import {
+  createGetDetailedTranscriptionTool,
+  createGetItemsDataTool,
+  createGetProjectStateTool,
+} from './query.tools';
 import { createSubagentDebugReporter } from './subagent-debug';
 import type {
   InvestigateTranscriptionInput,
@@ -17,31 +24,43 @@ import type {
   ToolsContext,
 } from './types';
 
-const primaryModelId = 'google/gemini-3-flash';
-const fallbackModelId = 'google/gemini-3.1-flash-lite-preview';
+const primaryModelId = 'google/gemini-3.5-flash';
+const fallbackModelId = 'google/gemini-3.1-flash-lite';
 
 const investigationAgentOutputSchema = z.object({
   answer: z.string().trim().min(1).max(4000),
-  findings: z.array(z.object({
-    label: z.string().trim().min(1).max(80).optional(),
-    startTimeInSeconds: z.number().min(0).optional(),
-    endTimeInSeconds: z.number().min(0).optional(),
-    confidence: z.number().min(0).max(1).optional(),
-    reason: z.string().trim().min(1).max(300).optional(),
-  })).max(60).default([]),
+  generalization: z.string().trim().min(1).max(2000).optional(),
+  findings: z
+    .array(
+      z.object({
+        label: z.string().trim().min(1).max(80).optional(),
+        startTimeInSeconds: z.number().min(0).optional(),
+        endTimeInSeconds: z.number().min(0).optional(),
+        confidence: z.number().min(0).max(1).optional(),
+        reason: z.string().trim().min(1).max(300).optional(),
+      }),
+    )
+    .max(60)
+    .default([]),
 });
 
 type InvestigationAgentOutput = z.infer<typeof investigationAgentOutputSchema>;
 
 const investigationCutRangeOutputSchema = z.object({
   answer: z.string().trim().min(1).max(4000),
-  findings: z.array(z.object({
-    label: z.string().trim().min(1).max(80),
-    startTimeInSeconds: z.number().min(0),
-    endTimeInSeconds: z.number().min(0),
-    confidence: z.number().min(0).max(1),
-    reason: z.string().trim().min(1).max(300),
-  })).max(60).default([]),
+  generalization: z.string().trim().min(1).max(2000).optional(),
+  findings: z
+    .array(
+      z.object({
+        label: z.string().trim().min(1).max(80),
+        startTimeInSeconds: z.number().min(0),
+        endTimeInSeconds: z.number().min(0),
+        confidence: z.number().min(0).max(1),
+        reason: z.string().trim().min(1).max(300),
+      }),
+    )
+    .max(60)
+    .default([]),
 });
 
 function requiresExactCutRanges(prompt: string, videoContext?: string) {
@@ -56,7 +75,7 @@ function buildInvestigationGeminiProviderOptions(modelId: string) {
     ...buildProviderOptions(modelId),
     google: {
       thinkingConfig: {
-        thinkingLevel: modelId === primaryModelId ? 'high' as const : 'low' as const,
+        thinkingLevel: 'low',
         includeThoughts: true,
       },
     },
@@ -64,12 +83,17 @@ function buildInvestigationGeminiProviderOptions(modelId: string) {
 }
 
 function parseInvestigationAgentOutput(text: string, requiresCutRanges: boolean): InvestigationAgentOutput {
-  const normalizedText = text.trim().replace(/^```json\s*/i, '').replace(/```$/, '').trim();
+  const normalizedText = text
+    .trim()
+    .replace(/^```json\s*/i, '')
+    .replace(/```$/, '')
+    .trim();
   const schema = requiresCutRanges ? investigationCutRangeOutputSchema : investigationAgentOutputSchema;
 
   if (!normalizedText) {
     return {
       answer: 'The transcription investigation completed without a structured summary.',
+      generalization: 'No usable transcript generalization was returned by the transcription subagent.',
       findings: [],
     };
   }
@@ -103,6 +127,7 @@ function buildInvestigationModelOutput(output: InvestigateTranscriptionResult) {
     type: 'text' as const,
     value: JSON.stringify({
       answer: output.answer,
+      generalization: output.generalization,
       findings: output.findings ?? [],
     }),
   };
@@ -187,6 +212,7 @@ export function createInvestigateTranscriptionTool(
     'Set up a Gemini 3 Flash transcription subagent for transcript-heavy investigations.',
     'Use this when you need the transcript analyzed',
     'Great for bad takes, repeated attempts, quote search, topic detection, or locating moments in speech.',
+    'It first builds a compact transcript generalization, then drills into detailed word-level chunks for evidence.',
     'Provide a focused prompt for the subagent. Optionally if user asks scope it to itemIds or minute ranges.',
     'The subagent can only inspect 10 minutes of detailed transcription per call, so it must split longer videos into multiple calls.',
     'Be specific about what you need from the subagent.',
@@ -198,11 +224,14 @@ export function createInvestigateTranscriptionTool(
   return {
     description,
     inputSchema: z.object({
-      prompt: z.string()
+      prompt: z
+        .string()
         .trim()
         .min(1)
         .max(1200)
-        .describe('State exactly what you need from the subagent. Be specific about the expected output, such as timestamps, snippets, quotes, reasons, confidence, or uncertainty.'),
+        .describe(
+          'State exactly what you need from the subagent. Be specific about the expected output, such as timestamps, snippets, quotes, reasons, confidence, or uncertainty.',
+        ),
       itemIds: z.array(z.string().trim().min(1)).optional(),
       minutes: z.array(z.number().int().min(1)).optional(),
       videoContext: z.string().trim().max(2000).optional(),
@@ -247,6 +276,7 @@ export function createInvestigateTranscriptionTool(
         const result: InvestigateTranscriptionResult = {
           status: 'completed',
           answer: primaryOutput.answer,
+          generalization: primaryOutput.generalization,
           findings: primaryOutput.findings,
           targetItemIds: normalizedItemIds,
           minutes: normalizedMinutes,
@@ -259,7 +289,10 @@ export function createInvestigateTranscriptionTool(
         yield result;
         return;
       } catch (primaryError) {
-        deps.logger?.warn('Primary transcription investigation model failed. Retrying with fallback.', primaryError);
+        deps.logger?.warn(
+          'Primary transcription investigation model failed. Retrying with fallback.',
+          primaryError,
+        );
       }
 
       try {
@@ -285,6 +318,7 @@ export function createInvestigateTranscriptionTool(
         const result: InvestigateTranscriptionResult = {
           status: 'completed',
           answer: fallbackOutput.answer,
+          generalization: fallbackOutput.generalization,
           findings: fallbackOutput.findings,
           targetItemIds: normalizedItemIds,
           minutes: normalizedMinutes,
@@ -303,11 +337,15 @@ export function createInvestigateTranscriptionTool(
           targetItemIds: normalizedItemIds,
           minutes: normalizedMinutes,
           note: 'Failed to investigate the transcription.',
-          error: fallbackError instanceof Error ? fallbackError.message : 'Failed to investigate the transcription.',
+          error:
+            fallbackError instanceof Error
+              ? fallbackError.message
+              : 'Failed to investigate the transcription.',
         };
         return;
       }
     },
-    toModelOutput: ({ output }: { output: InvestigateTranscriptionResult }) => buildInvestigationModelOutput(output),
+    toModelOutput: ({ output }: { output: InvestigateTranscriptionResult }) =>
+      buildInvestigationModelOutput(output),
   } as unknown as Tool<InvestigateTranscriptionInput, InvestigateTranscriptionResult>;
 }

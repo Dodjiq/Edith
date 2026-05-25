@@ -122,6 +122,14 @@ export const MODEL_REGISTRY: Record<string, ModelConfig> = {
     },
   },
 
+  'google/gemini-3.5-flash': {
+    provider: 'google',
+    thinking: {
+      budgetTokens: 20000,
+      thinkingLevel: 'low',
+    },
+  },
+
   'google/gemini-3-flash': {
     provider: 'google',
     thinking: {

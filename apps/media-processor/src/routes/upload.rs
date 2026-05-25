@@ -9,7 +9,7 @@
 //! 1. NestJS server uploads video to S3 via multipart
 //! 2. NestJS calls /extract-audio with presigned S3 URL
 //! 3. This service extracts audio via FFmpeg and returns MP3
-//! 4. NestJS sends MP3 to Speechmatics Batch API for transcription
+//! 4. NestJS sends MP3 to ElevenLabs Scribe v2 for transcription
 
 use axum::{
     extract::{Query, State},
@@ -36,7 +36,7 @@ pub fn create_upload_routes(services: AppServices) -> Router {
 
 /// Extract audio from a URL and return as MP3.
 /// Streams the video from the URL, extracts audio via FFmpeg, returns MP3 binary.
-/// This is used for large video files before sending to Speechmatics Batch API.
+/// This is used for large video files before sending to ElevenLabs Scribe v2.
 ///
 /// Optimized with:
 /// - Reduced probesize (32KB vs 5MB) for faster format detection

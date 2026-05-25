@@ -2,7 +2,7 @@
 //!
 //! Extracts audio from video files using ffmpeg for transcription pipeline.
 //!
-//! Output format (for Speechmatics Batch API):
+//! Output format for ElevenLabs Scribe v2:
 //! - MP3 format (128kbps)
 //! - 44.1kHz sample rate
 //! - Mono channel
@@ -94,7 +94,7 @@ impl FfmpegService {
     }
 
     /// Extract audio from a URL (e.g., S3 presigned URL) with low-latency optimizations.
-    /// Returns MP3 audio for Speechmatics Batch API.
+    /// Returns MP3 audio for ElevenLabs Scribe v2.
     pub async fn extract_audio_from_url(&self, url: &str) -> Result<Vec<u8>, FfmpegError> {
         use std::time::Instant;
 
@@ -123,7 +123,7 @@ impl FfmpegService {
                 // === SKIP NON-AUDIO ===
                 "-vn", "-dn", "-sn",
                 "-map", "0:a:0",
-                // === AUDIO ENCODING (MP3 for Speechmatics Batch) ===
+                // === AUDIO ENCODING (MP3 for ElevenLabs Scribe v2) ===
                 "-c:a", "libmp3lame",
                 "-b:a", "128k",
                 "-ar", "44100",

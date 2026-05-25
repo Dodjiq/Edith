@@ -1,11 +1,18 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { DeleteAssetRequest, UploadProgressPayload, realtimeMessageTypes, TranscriptionCompletePayload } from 'api-types';
+import {
+  DeleteAssetRequest,
+  UploadProgressPayload,
+  realtimeMessageTypes,
+  TranscriptionCompletePayload,
+} from 'api-types';
 import { randomUUID } from 'crypto';
 import { AwsService, CompletedPart } from '../aws/aws.service';
 import { RealtimeService } from '../realtime/realtime.service';
-import { SpeechmaticsService } from '../speechmatics/speechmatics.service';
+import { ElevenlabsService } from '../elevenlabs/elevenlabs.service';
 import { VideoAnalysisService } from '../video-analysis/video-analysis.service';
+
+type UploadTranscriptionResult = Pick<TranscriptionCompletePayload, 'metadata' | 'transcription'>;
 
 interface ActiveMultipartUpload {
   s3UploadId: string;
@@ -30,7 +37,7 @@ export class UploadService {
     private readonly configService: ConfigService,
     private readonly awsService: AwsService,
     private readonly realtimeService: RealtimeService,
-    private readonly speechmaticsService: SpeechmaticsService,
+    private readonly elevenlabsService: ElevenlabsService,
     private readonly videoAnalysisService: VideoAnalysisService,
   ) {
     let rustUrl = this.configService.get<string>('MEDIA_PROCESSOR_URL') ?? 'http://127.0.0.1:4005';
@@ -62,7 +69,9 @@ export class UploadService {
     return { valid: true };
   }
 
-  async generatePresignedUrl(contentType: string): Promise<{ presignedUrl: string; readUrl: string; fileKey: string }> {
+  async generatePresignedUrl(
+    contentType: string,
+  ): Promise<{ presignedUrl: string; readUrl: string; fileKey: string }> {
     const fileKey = this.awsService.generateFileKey();
     const presignedUrl = await this.awsService.getPresignedPutUrl(fileKey, contentType);
     const readUrl = this.awsService.getReadUrl(fileKey);
@@ -88,7 +97,9 @@ export class UploadService {
     });
 
     const partSize = this.awsService.calculatePartSize(fileSize);
-    this.logger.log(`Initialized multipart upload: uploadId=${uploadId}, key=${key}, partSize=${this.formatBytes(partSize)}`);
+    this.logger.log(
+      `Initialized multipart upload: uploadId=${uploadId}, key=${key}, partSize=${this.formatBytes(partSize)}`,
+    );
 
     return { uploadId, key, partSize, maxConcurrency: MAX_CONCURRENCY };
   }
@@ -133,12 +144,18 @@ export class UploadService {
       this.triggerTranscription(assetId, upload.key, upload.contentType, upload.fileSize);
     } else if (needsTranscription && !canTranscribe) {
       // Frontend requested transcription but file is not audio/video - emit complete
-      this.logger.log(`Skipping transcription for ${assetId}: contentType=${upload.contentType} is not audio/video`);
+      this.logger.log(
+        `Skipping transcription for ${assetId}: contentType=${upload.contentType} is not audio/video`,
+      );
       this.emitProgress(assetId, 100, 'complete');
     }
 
     if (needsVideoAnalysis && upload.contentType.startsWith('video/')) {
-      this.videoAnalysisService.triggerVideoAnalysis({ assetId, fileKey: upload.key, projectId: resolvedProjectId });
+      this.videoAnalysisService.triggerVideoAnalysis({
+        assetId,
+        fileKey: upload.key,
+        projectId: resolvedProjectId,
+      });
     }
 
     return { fileKey: upload.key, readUrl };
@@ -178,7 +195,9 @@ export class UploadService {
           await this.awsService.deleteObject(fileKey);
         } catch (error) {
           const message = error instanceof Error ? error.message : 'Failed to delete S3 object';
-          this.logger.error(`S3 asset deletion failed for assetId=${assetId}, fileKey=${fileKey}: ${message}`);
+          this.logger.error(
+            `S3 asset deletion failed for assetId=${assetId}, fileKey=${fileKey}: ${message}`,
+          );
           warnings.push(`S3 delete failed: ${message}`);
         }
       } else {
@@ -224,10 +243,10 @@ export class UploadService {
   }
 
   /**
-   * Trigger transcription using Speechmatics Batch API.
+   * Trigger transcription using ElevenLabs Scribe v2.
    * Routing based on content type:
-   * - Video: Extract audio via Rust first, then send to Speechmatics
-   * - Audio: Send URL directly to Speechmatics (no Rust needed)
+   * - Video: Extract audio via Rust first, then send to ElevenLabs
+   * - Audio: Send URL directly to ElevenLabs (no Rust needed)
    */
   triggerTranscription(assetId: string, fileKey: string, contentType: string, fileSize: number): void {
     const isVideo = contentType.startsWith('video/');
@@ -239,7 +258,7 @@ export class UploadService {
     this.emitProgress(assetId, 0, 'transcribing');
 
     this.performTranscription(assetId, fileKey, isVideo)
-      .then((transcription) => {
+      .then(({ transcription, metadata }) => {
         const hasNoTranscription = transcription.length === 0;
         this.logger.log(
           `Transcription complete for assetId=${assetId}, words=${transcription.length}` +
@@ -247,7 +266,7 @@ export class UploadService {
         );
         this.realtimeService.dispatchMessage<TranscriptionCompletePayload>({
           type: realtimeMessageTypes.transcriptionComplete,
-          payload: { assetId, transcription, hasNoTranscription },
+          payload: { assetId, transcription, hasNoTranscription, metadata },
           timestamp: new Date().toISOString(),
         });
       })
@@ -263,15 +282,15 @@ export class UploadService {
   }
 
   /**
-   * Perform transcription via Speechmatics Batch API.
+   * Perform transcription via ElevenLabs Scribe v2.
    * - Videos: Extract audio via Rust first (video files contain much more than just audio)
-   * - Audio: Send S3 URL directly to Speechmatics (no Rust needed)
+   * - Audio: Send S3 URL directly to ElevenLabs (no Rust needed)
    */
   private async performTranscription(
     assetId: string,
     fileKey: string,
     isVideo: boolean,
-  ): Promise<TranscriptionCompletePayload['transcription']> {
+  ): Promise<UploadTranscriptionResult> {
     const totalStart = Date.now();
 
     // Step 1: Generate presigned URL
@@ -298,18 +317,20 @@ export class UploadService {
       const extractDuration = Date.now() - extractStart;
       this.logger.log(
         `[TIMING] Audio extraction complete: ${this.formatBytes(audioBuffer.length)} in ${(extractDuration / 1000).toFixed(2)}s ` +
-          `(${((audioBuffer.length / 1024 / 1024) / (extractDuration / 1000)).toFixed(2)} MB/s)`,
+          `(${(audioBuffer.length / 1024 / 1024 / (extractDuration / 1000)).toFixed(2)} MB/s)`,
       );
 
-      // Step 3: Transcribe via Speechmatics
-      this.logger.log(`[TIMING] Starting Speechmatics transcription for assetId=${assetId}`);
+      // Step 3: Transcribe via ElevenLabs Scribe v2
+      this.logger.log(`[TIMING] Starting ElevenLabs Scribe v2 transcription for assetId=${assetId}`);
       const transcribeStart = Date.now();
-      const transcription = await this.speechmaticsService.transcribeFromBuffer({
+      const result = await this.elevenlabsService.transcribeFromBuffer({
         buffer: audioBuffer,
         mimeType: 'audio/mpeg',
       });
       const transcribeDuration = Date.now() - transcribeStart;
-      this.logger.log(`[TIMING] Speechmatics transcription complete in ${(transcribeDuration / 1000).toFixed(2)}s`);
+      this.logger.log(
+        `[TIMING] ElevenLabs Scribe v2 transcription complete in ${(transcribeDuration / 1000).toFixed(2)}s`,
+      );
 
       // Total timing
       const totalDuration = Date.now() - totalStart;
@@ -318,12 +339,12 @@ export class UploadService {
           `(extract: ${(extractDuration / 1000).toFixed(2)}s, transcribe: ${(transcribeDuration / 1000).toFixed(2)}s)`,
       );
 
-      return transcription;
+      return { transcription: result.captions, metadata: result.metadata };
     } else {
-      // Audio: Send URL directly to Speechmatics
-      this.logger.log(`[TIMING] Sending audio URL directly to Speechmatics for assetId=${assetId}`);
+      // Audio: Send URL directly to ElevenLabs
+      this.logger.log(`[TIMING] Sending audio URL directly to ElevenLabs Scribe v2 for assetId=${assetId}`);
       const transcribeStart = Date.now();
-      const transcription = await this.speechmaticsService.transcribeFromUrl({ url: presignedUrl });
+      const result = await this.elevenlabsService.transcribeFromUrl({ url: presignedUrl });
       const transcribeDuration = Date.now() - transcribeStart;
 
       const totalDuration = Date.now() - totalStart;
@@ -332,7 +353,7 @@ export class UploadService {
           `(transcribe: ${(transcribeDuration / 1000).toFixed(2)}s)`,
       );
 
-      return transcription;
+      return { transcription: result.captions, metadata: result.metadata };
     }
   }
 

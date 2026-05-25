@@ -9,17 +9,14 @@ type GetRemovedSegmentsParams = {
 
 type GetSourceRemovedSegmentsParams = {
   mergedAudibleParts: AudiblePart[];
-  sourceDurationInSeconds: number;
+  sourceStartInSeconds?: number;
+  sourceEndInSeconds: number;
 };
 
 const getItemOffset = (item: AudioCapableItem): number =>
   item.type === 'video' ? item.videoStartFromInSeconds : item.audioStartFromInSeconds;
 
-export const getRemovedSegments = ({
-  item,
-  mergedAudibleParts,
-  fps,
-}: GetRemovedSegmentsParams): RemovedSegment[] => {
+export const getRemovedSegments = ({ item, mergedAudibleParts, fps }: GetRemovedSegmentsParams): RemovedSegment[] => {
   const itemOffset = getItemOffset(item);
   const itemDurationInSeconds = item.durationInFrames / fps;
   const itemEnd = itemOffset + itemDurationInSeconds;
@@ -52,14 +49,22 @@ export const getRemovedSegments = ({
 
 export const getSourceRemovedSegments = ({
   mergedAudibleParts,
-  sourceDurationInSeconds,
+  sourceStartInSeconds = 0,
+  sourceEndInSeconds,
 }: GetSourceRemovedSegmentsParams): RemovedSegmentFromSource[] => {
-  if (mergedAudibleParts.length === 0) return [];
+  if (mergedAudibleParts.length === 0 || sourceEndInSeconds <= sourceStartInSeconds) return [];
 
   const gaps: RemovedSegmentFromSource[] = [];
-  let cursor = 0;
+  let cursor = sourceStartInSeconds;
+  const scopedAudibleParts = mergedAudibleParts
+    .map((part) => ({
+      startInSeconds: Math.max(part.startInSeconds, sourceStartInSeconds),
+      endInSeconds: Math.min(part.endInSeconds, sourceEndInSeconds),
+    }))
+    .filter((part) => part.endInSeconds > part.startInSeconds)
+    .sort((a, b) => a.startInSeconds - b.startInSeconds);
 
-  for (const part of mergedAudibleParts) {
+  for (const part of scopedAudibleParts) {
     if (part.startInSeconds > cursor) {
       gaps.push({
         sourceStartInSeconds: cursor,
@@ -70,11 +75,11 @@ export const getSourceRemovedSegments = ({
     cursor = Math.max(cursor, part.endInSeconds);
   }
 
-  if (cursor < sourceDurationInSeconds) {
+  if (cursor < sourceEndInSeconds) {
     gaps.push({
       sourceStartInSeconds: cursor,
-      sourceEndInSeconds: sourceDurationInSeconds,
-      durationInSeconds: sourceDurationInSeconds - cursor,
+      sourceEndInSeconds,
+      durationInSeconds: sourceEndInSeconds - cursor,
     });
   }
 

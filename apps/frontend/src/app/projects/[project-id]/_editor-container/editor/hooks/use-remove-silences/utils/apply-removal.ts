@@ -1,12 +1,7 @@
 import { EditorState } from '../../../state/types';
-import {
-  spliceItem,
-  SpliceItemResult,
-  KeepRange,
-  getSourceOffsetInSeconds,
-} from '../../../state/actions/splice-item';
+import { spliceItem, SpliceItemResult, KeepRange, getSourceOffsetInSeconds } from '../../../state/actions/splice-item';
 import { AudioCapableItem, AudiblePart, RemovedSegment } from '../types';
-import { getRemovedSegments } from './get-removed-segments';
+import { getRemovedSegments, getSourceRemovedSegments } from './get-removed-segments';
 import { shiftFollowingItems } from './shift-following-items';
 
 type ApplyRemovalParams = {
@@ -20,6 +15,7 @@ type ApplyRemovalParams = {
 type ApplyRemovalResult = {
   state: EditorState;
   removedSegments: RemovedSegment[];
+  sourceRemovedSegments: ReturnType<typeof getSourceRemovedSegments>;
   spliceResult: SpliceItemResult | null;
 };
 
@@ -93,12 +89,12 @@ export const applyRemovalForItem = ({
   const currentItem = state.undoableState.items[itemId] as AudioCapableItem | undefined;
 
   if (!currentItem) {
-    return { state, removedSegments: [], spliceResult: null };
+    return { state, removedSegments: [], sourceRemovedSegments: [], spliceResult: null };
   }
 
   const trackIndex = state.undoableState.tracks.findIndex((track) => track.items.includes(itemId));
   if (trackIndex === -1) {
-    return { state, removedSegments: [], spliceResult: null };
+    return { state, removedSegments: [], sourceRemovedSegments: [], spliceResult: null };
   }
 
   const track = state.undoableState.tracks[trackIndex];
@@ -110,14 +106,19 @@ export const applyRemovalForItem = ({
   const mergedAudibleParts = expandAndMergeParts(audibleParts, paddingInSeconds, itemOffset, itemEnd);
 
   if (mergedAudibleParts.length === 0) {
-    return { state, removedSegments: [], spliceResult: null };
+    return { state, removedSegments: [], sourceRemovedSegments: [], spliceResult: null };
   }
 
   // Convert to keep ranges
   const keepRanges = audiblePartsToKeepRanges(currentItem, mergedAudibleParts, fps);
 
   if (keepRanges.length === 0) {
-    return { state, removedSegments: [], spliceResult: null };
+    return { state, removedSegments: [], sourceRemovedSegments: [], spliceResult: null };
+  }
+
+  const totalKeptFrames = keepRanges.reduce((sum, range) => sum + range.durationInFrames, 0);
+  if (totalKeptFrames >= currentItem.durationInFrames) {
+    return { state, removedSegments: [], sourceRemovedSegments: [], spliceResult: null };
   }
 
   // Use spliceItem to apply the changes
@@ -129,7 +130,7 @@ export const applyRemovalForItem = ({
   });
 
   if (!spliceOutput) {
-    return { state, removedSegments: [], spliceResult: null };
+    return { state, removedSegments: [], sourceRemovedSegments: [], spliceResult: null };
   }
 
   let newState = spliceOutput.state;
@@ -151,6 +152,11 @@ export const applyRemovalForItem = ({
     mergedAudibleParts,
     fps,
   });
+  const sourceRemovedSegments = getSourceRemovedSegments({
+    mergedAudibleParts,
+    sourceStartInSeconds: itemOffset,
+    sourceEndInSeconds: itemEnd,
+  });
 
-  return { state: newState, removedSegments, spliceResult };
+  return { state: newState, removedSegments, sourceRemovedSegments, spliceResult };
 };

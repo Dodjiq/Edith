@@ -92,6 +92,8 @@ describe('createGetDetailedTranscriptionTool', () => {
       targetItemIds: ['item-1'],
       wordCount: 42,
       transcription: [],
+      generalization:
+        'No transcript words are currently available. The audio may still be processing, silent, or missing from the selected timeline scope.',
       note: 'Retrieved 42 words for minute(s): 3, 4.',
     });
   });

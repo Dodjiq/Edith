@@ -92,7 +92,13 @@ export const useGetTranscription = () => {
 
       // Priority 1: Item has its own transcription (from splice, already item-portion-relative)
       if (item.transcription && item.transcription.length > 0) {
-        console.debug('[getItemTranscription] Item', item.id, 'has own transcription:', item.transcription.length, 'words');
+        console.debug(
+          '[getItemTranscription] Item',
+          item.id,
+          'has own transcription:',
+          item.transcription.length,
+          'words',
+        );
         return item.transcription.map(toApiCaption);
       }
 
@@ -117,7 +123,17 @@ export const useGetTranscription = () => {
       const durationMs = framesToMs(item.durationInFrames, fps);
 
       const sliced = sliceTranscription(assetTranscription, sourceOffsetMs, durationMs);
-      console.debug('[getItemTranscription] Item', item.id, 'sliced from asset:', sliced.length, 'words (sourceOffset:', sourceOffsetMs, 'duration:', durationMs, ')');
+      console.debug(
+        '[getItemTranscription] Item',
+        item.id,
+        'sliced from asset:',
+        sliced.length,
+        'words (sourceOffset:',
+        sourceOffsetMs,
+        'duration:',
+        durationMs,
+        ')',
+      );
       return sliced;
     },
     [stateRef],
@@ -203,14 +219,17 @@ export const useGetTranscription = () => {
         }
       }
 
-      console.debug('[resolveTargetItems] Resolved items:', resolved.map((i) => ({
-        id: i.id,
-        type: i.type,
-        from: i.from,
-        duration: i.durationInFrames,
-        hasTranscription: !!(i.transcription && i.transcription.length > 0),
-        transcriptionLength: i.transcription?.length ?? 0,
-      })));
+      console.debug(
+        '[resolveTargetItems] Resolved items:',
+        resolved.map((i) => ({
+          id: i.id,
+          type: i.type,
+          from: i.from,
+          duration: i.durationInFrames,
+          hasTranscription: !!(i.transcription && i.transcription.length > 0),
+          transcriptionLength: i.transcription?.length ?? 0,
+        })),
+      );
 
       return resolved.sort((a, b) => a.from - b.from);
     },
@@ -258,6 +277,7 @@ export const useGetTranscription = () => {
         startFrame: item.from + Math.floor((caption.startMs / 1000) * fps),
         endFrame: item.from + Math.floor((caption.endMs / 1000) * fps),
         trackId,
+        confidence: caption.confidence,
       }));
     },
     [stateRef, getTrackIdForItem],
@@ -294,7 +314,12 @@ export const useGetTranscription = () => {
       const results = targetItems.map((item) => {
         // If marked as having no transcription, consider it "processed"
         if (itemHasNoTranscription(item)) {
-          return { itemId: item.id, hasNoTranscription: true, hasTranscription: true, reason: 'marked-no-transcription' };
+          return {
+            itemId: item.id,
+            hasNoTranscription: true,
+            hasTranscription: true,
+            reason: 'marked-no-transcription',
+          };
         }
         const transcription = getItemTranscription(item);
         const hasIt = transcription !== null && transcription.length > 0;
@@ -471,6 +496,7 @@ export const useGetTranscription = () => {
               startFrame: firstItemFrom + Math.floor((caption.startMs / 1000) * fps),
               endFrame: firstItemFrom + Math.floor((caption.endMs / 1000) * fps),
               trackId,
+              confidence: caption.confidence,
             };
           });
         }
@@ -564,7 +590,8 @@ export const useGetTranscription = () => {
       }
 
       if (normalizedMinutes.length > 10) {
-        const error = 'Detailed transcription is limited to 10 minutes per request. Split longer ranges into multiple calls.';
+        const error =
+          'Detailed transcription is limited to 10 minutes per request. Split longer ranges into multiple calls.';
         toast.error('Cannot get detailed transcription', { description: error });
         await report('error', { error, requestedItemIds: itemIds, minutes: normalizedMinutes });
         return null;
@@ -620,6 +647,7 @@ export const useGetTranscription = () => {
           wordCount: filteredWords.length,
           targetItemIds: targetItems.map((i) => i.id),
           minutes: normalizedMinutes,
+          fps,
         });
 
         return filteredWords;

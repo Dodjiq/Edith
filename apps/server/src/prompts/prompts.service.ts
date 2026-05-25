@@ -68,6 +68,14 @@ export class PromptsService {
     - In one cut_frame_range call, every range must use the original pre-cut timeline coordinates. The editor applies batched ranges from the end backward; never pre-shift later ranges for earlier cuts.
     - If a completed timeline edit is not what you intended, call get_project_state before any correction. Do not delete and rebuild completed edits unless the user asked for a reset.
 
+    ## Silence cleanup workflow
+    - For requests to remove silences, cut pauses, or tighten a talking-head edit, use ${editorToolNames.removeSilences}.
+    - Do not loop through items one by one. Pass all target video/audio item IDs to ${editorToolNames.removeSilences} using itemIds.
+    - After cut_time_ranges splits a clip into many new items, use the currentAudioItemIds from the cut result or call get_project_state once, then call ${editorToolNames.removeSilences} once with all those IDs.
+    - Use detectionMode="auto" unless there is a clear reason to force audio waveform detection.
+    - Do not use get_transcription only to find ordinary silences; ${editorToolNames.removeSilences} already uses transcript timings when available.
+    - Timeline cleanup is a ripple-delete workflow: the primary media track should not end with empty holes between kept segments. If a tool reports remaining timeline gaps, inspect/correct before saying the edit is done.
+
     ## Captions tool
     - Pass all item IDs to set_captions (auto-sorted and mixed)
     - Call get_items_data before editing caption text
@@ -75,7 +83,7 @@ export class PromptsService {
     - Do not use set_captions for a fixed on-screen label like a language name; use delegate_text_overlay_task instead.
 
     ## Transcription tool
-    - get_transcription prepares transcription in the timeline and returns only status metadata
+    - get_transcription prepares transcription in the timeline and returns compact status metadata plus a readable transcript generalization
     - investigate_transcription is the preferred tool for transcript-heavy research (bad takes, repeated attempts, quote search, locating spoken moments). It's like a employee that you use to investigate.
 
     # Response guidelines
@@ -269,14 +277,19 @@ export class PromptsService {
     const originalAssetsLines = originalAssetsInfo?.length
       ? originalAssetsInfo
           .map((asset) => {
+            const maxSegmentsToList = 12;
             const removedSegmentsDetail =
               asset.removedSegments.length > 0
                 ? asset.removedSegments
+                    .slice(0, maxSegmentsToList)
                     .map(
                       (seg) =>
                         `${seg.sourceStartInSeconds.toFixed(2)}s-${seg.sourceEndInSeconds.toFixed(2)}s`,
                     )
-                    .join(', ')
+                    .join(', ') +
+                  (asset.removedSegments.length > maxSegmentsToList
+                    ? `, ... ${asset.removedSegments.length - maxSegmentsToList} more`
+                    : '')
                 : 'none';
             const totalRemovedDuration = asset.removedSegments.reduce(
               (acc, seg) => acc + seg.durationInSeconds,

@@ -1,5 +1,6 @@
 'use client';
 
+import { Thumbnail } from '@remotion/player';
 import { useInView, useReducedMotion } from 'motion/react';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { MotionDesignTemplate, MotionDesignTemplateId } from 'api-types';
@@ -25,15 +26,31 @@ type MotionTemplatePreviewProps = {
   template: MotionDesignTemplate;
 };
 
+type MotionStudioTemplateThumbnailProps = {
+  durationInFrames: number;
+  item: MotionDesignItem;
+};
+
+const MotionStudioTemplateThumbnail: React.FC<MotionStudioTemplateThumbnailProps> = ({ durationInFrames, item }) => {
+  return renderMotionDesign({
+    item,
+    frame: 0,
+    fps: previewFps,
+    durationInFrames,
+  });
+};
+
 const getPosterFrame = (template: MotionDesignTemplate): number => {
   const duration = template.defaultDurationInFrames;
+  const lastFrame = Math.max(0, duration - 1);
+  const clampFrame = (frame: number) => Math.min(Math.max(0, frame), lastFrame);
 
-  if (lateFrameTemplateIds.has(template.id)) return Math.round(duration * 0.72);
-  if (template.id === 'lower-third-slide') return Math.round(duration * 0.32);
-  if (template.id === 'confetti-hit' || template.id === 'counter-confetti') return Math.round(duration * 0.42);
-  if (template.category === 'gradient') return Math.round(duration * 0.48);
+  if (lateFrameTemplateIds.has(template.id)) return clampFrame(Math.round(duration * 0.72));
+  if (template.id === 'lower-third-slide') return clampFrame(Math.round(duration * 0.32));
+  if (template.id === 'confetti-hit' || template.id === 'counter-confetti') return clampFrame(Math.round(duration * 0.42));
+  if (template.category === 'gradient') return clampFrame(Math.round(duration * 0.48));
 
-  return Math.round(duration * 0.58);
+  return clampFrame(Math.round(duration * 0.58));
 };
 
 const getInitialFrameOffset = (template: MotionDesignTemplate): number => {
@@ -82,6 +99,7 @@ const MotionTemplatePreviewComponent: React.FC<MotionTemplatePreviewProps> = ({ 
   const posterFrame = useMemo(() => getPosterFrame(template), [template]);
   const initialFrameOffset = useMemo(() => getInitialFrameOffset(template), [template]);
   const [animatedFrame, setAnimatedFrame] = useState<number | null>(null);
+  const isMotionStudioTemplate = item.templateId.startsWith('ms-');
   const canAnimate = isInView && !shouldReduceMotion;
   const previewFrame = canAnimate && animatedFrame !== null ? animatedFrame : posterFrame;
   const previewStyle = useMemo<React.CSSProperties>(
@@ -129,12 +147,32 @@ const MotionTemplatePreviewComponent: React.FC<MotionTemplatePreviewProps> = ({ 
     >
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute left-0 top-0 overflow-hidden" style={previewCanvasStyle}>
-          {renderMotionDesign({
-            item,
-            frame: previewFrame,
-            fps: previewFps,
-            durationInFrames: item.durationInFrames,
-          })}
+          {isMotionStudioTemplate ? (
+            <Thumbnail
+              component={MotionStudioTemplateThumbnail}
+              compositionHeight={previewHeight}
+              compositionWidth={previewWidth}
+              durationInFrames={item.durationInFrames}
+              fps={previewFps}
+              frameToDisplay={previewFrame}
+              inputProps={{
+                durationInFrames: item.durationInFrames,
+                item,
+              }}
+              noSuspense
+              style={{
+                height: previewHeight,
+                width: previewWidth,
+              }}
+            />
+          ) : (
+            renderMotionDesign({
+              item,
+              frame: previewFrame,
+              fps: previewFps,
+              durationInFrames: item.durationInFrames,
+            })
+          )}
         </div>
       </div>
       <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-white/10" />

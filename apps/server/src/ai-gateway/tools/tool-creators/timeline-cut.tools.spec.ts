@@ -88,6 +88,7 @@ describe('timeline cut tools', () => {
       removedFrames: 63,
       removedSeconds: 2.1,
       note: 'Cut 2.10s on the timeline using 3 requested range(s) merged into 2 cut(s).',
+      projectState: undefined,
     });
   });
 

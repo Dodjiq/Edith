@@ -3,10 +3,19 @@ import type { ReportToolResultRequest, TranscriptionWord } from 'api-types';
 /** Strip URLs and verbose fields from project state to reduce AI context token usage. */
 export function stripUrlsFromProjectState<T extends Record<string, unknown>>(data: T): T {
   const result = { ...data } as Record<string, unknown>;
+  const maxRemovedSegments = 20;
 
   if (Array.isArray(result.projectItemsInfo)) {
     result.projectItemsInfo = result.projectItemsInfo.map((item: Record<string, unknown>) => {
-      const { remoteUrl, durationInSeconds, endAtInSeconds, fileName, mimeType, startFromInSeconds, ...rest } = item;
+      const {
+        remoteUrl,
+        durationInSeconds,
+        endAtInSeconds,
+        fileName,
+        mimeType,
+        startFromInSeconds,
+        ...rest
+      } = item;
       return rest;
     });
   }
@@ -15,6 +24,27 @@ export function stripUrlsFromProjectState<T extends Record<string, unknown>>(dat
     result.items = result.items.map((item: Record<string, unknown>) => {
       const { remoteUrl, src, ...rest } = item;
       return rest;
+    });
+  }
+
+  if (Array.isArray(result.originalAssetsInfo)) {
+    result.originalAssetsInfo = result.originalAssetsInfo.map((asset: Record<string, unknown>) => {
+      const removedSegments = Array.isArray(asset.removedSegments)
+        ? (asset.removedSegments as Record<string, unknown>[])
+        : [];
+      const removedDurationSeconds = removedSegments.reduce((sum, segment) => {
+        const duration = typeof segment.durationInSeconds === 'number' ? segment.durationInSeconds : 0;
+        return sum + duration;
+      }, 0);
+      const { remoteUrl, ...rest } = asset;
+
+      return {
+        ...rest,
+        removedSegments: removedSegments.slice(0, maxRemovedSegments),
+        removedSegmentsCount: removedSegments.length,
+        removedDurationSeconds: Number(removedDurationSeconds.toFixed(3)),
+        removedSegmentsTruncated: removedSegments.length > maxRemovedSegments,
+      };
     });
   }
 
@@ -49,16 +79,65 @@ export function formatTranscriptionSummary(
   return { summary: lines.join('\n').trim(), totalMinutes: maxMinute + 1 };
 }
 
+export function buildTranscriptionGeneralization({
+  words,
+  fps,
+  maxCharacters = 3500,
+}: {
+  words: TranscriptionWord[];
+  fps: number;
+  maxCharacters?: number;
+}): { generalization: string; totalMinutes: number } {
+  const { summary, totalMinutes } = formatTranscriptionSummary(words, fps);
+
+  if (words.length === 0) {
+    return {
+      generalization:
+        'No transcript words are currently available. The audio may still be processing, silent, or missing from the selected timeline scope.',
+      totalMinutes,
+    };
+  }
+
+  const confidences = words
+    .map((word) => word.confidence)
+    .filter(
+      (confidence): confidence is number => typeof confidence === 'number' && Number.isFinite(confidence),
+    );
+  const averageConfidence =
+    confidences.length > 0
+      ? `${Math.round((confidences.reduce((sum, confidence) => sum + confidence, 0) / confidences.length) * 100)}% average confidence`
+      : 'confidence unavailable';
+  const trackIds = Array.from(new Set(words.map((word) => word.trackId).filter(Boolean)));
+  const compactTranscript =
+    summary.length > maxCharacters
+      ? `${summary.slice(0, maxCharacters).trimEnd()}\n[Transcript overview truncated.]`
+      : summary;
+
+  return {
+    totalMinutes,
+    generalization: [
+      `Transcript generalization: ${words.length} word(s) across ${totalMinutes} minute(s), ${averageConfidence}, ${trackIds.length} track(s).`,
+      'Use this as the orientation layer, then call get_detailed_transcription for exact timestamp evidence before making edit decisions.',
+      '',
+      compactTranscript,
+    ].join('\n'),
+  };
+}
+
 /** Map ReportToolResultRequest status to a simplified tool result status. */
 export function mapToolResultStatus<T extends string>(
   status: ReportToolResultRequest['status'],
   statusMap: { success: T; skipped?: T; error: T },
 ): T {
   switch (status) {
-    case 'success': return statusMap.success;
-    case 'skipped': return statusMap.skipped ?? statusMap.error;
-    case 'error': return statusMap.error;
-    default: return statusMap.error;
+    case 'success':
+      return statusMap.success;
+    case 'skipped':
+      return statusMap.skipped ?? statusMap.error;
+    case 'error':
+      return statusMap.error;
+    default:
+      return statusMap.error;
   }
 }
 

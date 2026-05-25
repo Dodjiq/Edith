@@ -11,6 +11,7 @@ import type {
   MotionDesignTemplate,
   MotionDesignTemplateWithAgentDescription,
   MotionDesignTimingCheck,
+  RemoveSilencesDetectionMode,
   ReportToolResultRequest,
   ShapeItemInput,
   ShapeItemPatchInput,
@@ -187,6 +188,7 @@ export type CutTimeRangesResult = {
   removedSeconds?: number;
   note?: string;
   error?: string;
+  projectState?: Record<string, unknown>;
 };
 
 // ============================================
@@ -220,6 +222,7 @@ export type GetTranscriptionResult = {
   wordCount?: number;
   itemCount?: number;
   totalMinutes?: number;
+  generalization?: string;
   note?: string;
   error?: string;
 };
@@ -233,6 +236,7 @@ export type GetDetailedTranscriptionResult = {
   note?: string;
   error?: string;
   transcription?: TranscriptionWord[];
+  generalization?: string;
 };
 
 export type InvestigateTranscriptionInput = {
@@ -254,6 +258,7 @@ export type InvestigateTranscriptionFinding = {
 export type InvestigateTranscriptionResult = {
   status: 'running' | 'completed' | 'timeout' | 'error';
   answer?: string;
+  generalization?: string;
   findings?: InvestigateTranscriptionFinding[];
   targetItemIds?: string[];
   minutes?: number[];
@@ -269,15 +274,18 @@ export type InvestigateTranscriptionResult = {
 
 export type RemoveSilencesInput = {
   itemId?: string;
+  itemIds?: string[];
   noiseThresholdInDecibels?: number;
   minDurationInSeconds?: number;
   paddingInSeconds?: number;
+  detectionMode?: RemoveSilencesDetectionMode;
   reason?: string;
 };
 
 export type RemoveSilencesResult = {
   status: 'completed' | 'skipped' | 'timeout' | 'error';
   targetItemId?: string;
+  targetItemIds?: string[];
   note?: string;
   output?: Record<string, unknown>;
   error?: string;

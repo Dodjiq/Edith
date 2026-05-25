@@ -9,7 +9,12 @@ import type {
 } from 'api-types';
 import { editorToolNames, realtimeMessageTypes } from 'api-types';
 import { z } from 'zod';
-import { stripUrlsFromProjectState, formatTranscriptionSummary, mapToolResultStatus, extractErrorDetail } from './utils';
+import {
+  stripUrlsFromProjectState,
+  buildTranscriptionGeneralization,
+  mapToolResultStatus,
+  extractErrorDetail,
+} from './utils';
 import type {
   ToolsContext,
   ToolDependencies,
@@ -37,8 +42,16 @@ function buildTranscriptionStatusModelOutput(output: GetTranscriptionResult) {
     type: 'text' as const,
     value:
       output.status === 'completed'
-        ? `Transcription prepared successfully${detailSuffix}.`
-        : output.note ?? output.error ?? 'Transcription request failed.',
+        ? JSON.stringify({
+            status: output.status,
+            message: `Transcription prepared successfully${detailSuffix}.`,
+            wordCount: output.wordCount,
+            itemCount: output.itemCount,
+            totalMinutes: output.totalMinutes,
+            targetItemIds: output.targetItemIds,
+            generalization: output.generalization,
+          })
+        : (output.note ?? output.error ?? 'Transcription request failed.'),
   };
 }
 
@@ -74,18 +87,32 @@ export function createGetProjectStateTool(
 
       const result = await waitForResult;
       if ('status' in result && result.status === 'timeout') {
-        return { status: 'timeout', note: 'No response received from editor after requesting project state.' };
+        return {
+          status: 'timeout',
+          note: 'No response received from editor after requesting project state.',
+        };
       }
 
-      const mappedStatus = mapToolResultStatus(result.status, { success: 'completed' as const, error: 'error' as const });
+      const mappedStatus = mapToolResultStatus(result.status, {
+        success: 'completed' as const,
+        error: 'error' as const,
+      });
       const errorDetail = extractErrorDetail(result);
 
       if (mappedStatus === 'error') {
-        return { status: 'error', note: errorDetail ?? 'Failed to retrieve project state.', error: errorDetail };
+        return {
+          status: 'error',
+          note: errorDetail ?? 'Failed to retrieve project state.',
+          error: errorDetail,
+        };
       }
 
       deps.logger?.debug('Project state retrieved successfully.');
-      return { status: 'completed', data: stripUrlsFromProjectState(result.output ?? {}), note: reason ?? 'Project state retrieved successfully.' };
+      return {
+        status: 'completed',
+        data: stripUrlsFromProjectState(result.output ?? {}),
+        note: reason ?? 'Project state retrieved successfully.',
+      };
     },
   } as unknown as Tool<GetProjectStateInput, GetProjectStateResult>;
 }
@@ -119,23 +146,47 @@ export function createGetItemsDataTool(
 
       deps.realtimeService.dispatchMessage({
         type: realtimeMessageTypes.editor,
-        payload: { tool_name: editorToolNames.getItemsData, params, toolCallId: resolvedToolCallId, messageId: context?.messageId, requestedAt: new Date().toISOString() },
+        payload: {
+          tool_name: editorToolNames.getItemsData,
+          params,
+          toolCallId: resolvedToolCallId,
+          messageId: context?.messageId,
+          requestedAt: new Date().toISOString(),
+        },
         timestamp: new Date().toISOString(),
       });
 
       const result = await waitForResult;
       if ('status' in result && result.status === 'timeout') {
-        return { status: 'timeout', requestedItemIds: normalizedIds, note: 'No response received from editor.' };
+        return {
+          status: 'timeout',
+          requestedItemIds: normalizedIds,
+          note: 'No response received from editor.',
+        };
       }
 
-      const mappedStatus = mapToolResultStatus(result.status, { success: 'completed' as const, skipped: 'skipped' as const, error: 'error' as const });
+      const mappedStatus = mapToolResultStatus(result.status, {
+        success: 'completed' as const,
+        skipped: 'skipped' as const,
+        error: 'error' as const,
+      });
       const errorDetail = extractErrorDetail(result);
 
       if (mappedStatus === 'error') {
-        return { status: 'error', requestedItemIds: normalizedIds, note: errorDetail ?? 'Failed to retrieve items data.', error: errorDetail };
+        return {
+          status: 'error',
+          requestedItemIds: normalizedIds,
+          note: errorDetail ?? 'Failed to retrieve items data.',
+          error: errorDetail,
+        };
       }
 
-      return { status: mappedStatus, requestedItemIds: normalizedIds, data: stripUrlsFromProjectState(result.output ?? {}), note: reason ?? `Retrieved data for ${normalizedIds.length} item(s).` };
+      return {
+        status: mappedStatus,
+        requestedItemIds: normalizedIds,
+        data: stripUrlsFromProjectState(result.output ?? {}),
+        note: reason ?? `Retrieved data for ${normalizedIds.length} item(s).`,
+      };
     },
   } as unknown as Tool<GetItemsDataInput, GetItemsDataResult>;
 }
@@ -159,7 +210,13 @@ export function createGetLibraryAssetsDataTool(
 
       deps.realtimeService.dispatchMessage({
         type: realtimeMessageTypes.editor,
-        payload: { tool_name: editorToolNames.getLibraryAssetsData, params: {} as Record<string, never>, toolCallId: resolvedToolCallId, messageId: context?.messageId, requestedAt: new Date().toISOString() } satisfies EditorGetLibraryAssetsDataPayload,
+        payload: {
+          tool_name: editorToolNames.getLibraryAssetsData,
+          params: {} as Record<string, never>,
+          toolCallId: resolvedToolCallId,
+          messageId: context?.messageId,
+          requestedAt: new Date().toISOString(),
+        } satisfies EditorGetLibraryAssetsDataPayload,
         timestamp: new Date().toISOString(),
       });
 
@@ -170,7 +227,9 @@ export function createGetLibraryAssetsDataTool(
         return `Failed to retrieve library assets data: ${errorDetail}`;
       }
 
-      const assets = Array.isArray(result.output?.libraryAssets) ? (result.output.libraryAssets as Record<string, unknown>[]) : [];
+      const assets = Array.isArray(result.output?.libraryAssets)
+        ? (result.output.libraryAssets as Record<string, unknown>[])
+        : [];
       const lines: string[] = [`# Library Assets (${assets.length})`];
       if (reason) lines.push(`_Reason: ${reason}_`);
       lines.push('');
@@ -180,9 +239,15 @@ export function createGetLibraryAssetsDataTool(
         const fileName = typeof asset.fileName === 'string' ? asset.fileName : 'unknown';
         const fileType = typeof asset.fileType === 'string' ? asset.fileType : 'unknown';
         const status = typeof asset.status === 'string' ? asset.status : undefined;
-        const duration = typeof asset.durationInSeconds === 'number' ? `${asset.durationInSeconds.toFixed(2)}s` : 'unknown';
+        const duration =
+          typeof asset.durationInSeconds === 'number' ? `${asset.durationInSeconds.toFixed(2)}s` : 'unknown';
 
-        lines.push(`## ${index + 1}. ${fileName}`, `- assetId: ${assetId}`, `- type: ${fileType}`, `- duration: ${duration}`);
+        lines.push(
+          `## ${index + 1}. ${fileName}`,
+          `- assetId: ${assetId}`,
+          `- type: ${fileType}`,
+          `- duration: ${duration}`,
+        );
         if (status) lines.push(`- status: ${status}`);
 
         const summary = asset.summary as Record<string, unknown> | undefined;
@@ -228,31 +293,57 @@ export function createGetTranscriptionTool(
     execute: async ({ itemIds, reason }: GetTranscriptionInput, { toolCallId }: { toolCallId?: string }) => {
       const resolvedToolCallId = toolCallId ?? `get-transcription-${Date.now()}`;
       const waitForResult = deps.waitForToolResult(resolvedToolCallId);
-      const normalizedItemIds = itemIds ? Array.from(new Set(itemIds.map((id) => id.trim()).filter((id) => id.length > 0))) : undefined;
-      const params: EditorGetTranscriptionPayload['params'] = { itemIds: normalizedItemIds?.length ? normalizedItemIds : undefined };
+      const normalizedItemIds = itemIds
+        ? Array.from(new Set(itemIds.map((id) => id.trim()).filter((id) => id.length > 0)))
+        : undefined;
+      const params: EditorGetTranscriptionPayload['params'] = {
+        itemIds: normalizedItemIds?.length ? normalizedItemIds : undefined,
+      };
 
       deps.realtimeService.dispatchMessage({
         type: realtimeMessageTypes.editor,
-        payload: { tool_name: editorToolNames.getTranscription, params, toolCallId: resolvedToolCallId, messageId: context?.messageId, requestedAt: new Date().toISOString() },
+        payload: {
+          tool_name: editorToolNames.getTranscription,
+          params,
+          toolCallId: resolvedToolCallId,
+          messageId: context?.messageId,
+          requestedAt: new Date().toISOString(),
+        },
         timestamp: new Date().toISOString(),
       });
 
       const result = await waitForResult;
       if ('status' in result && result.status === 'timeout') {
-        return { status: 'timeout', targetItemIds: params.itemIds, note: 'No response received from editor.' };
+        return {
+          status: 'timeout',
+          targetItemIds: params.itemIds,
+          note: 'No response received from editor.',
+        };
       }
 
-      const mappedStatus = mapToolResultStatus(result.status, { success: 'completed' as const, skipped: 'skipped' as const, error: 'error' as const });
+      const mappedStatus = mapToolResultStatus(result.status, {
+        success: 'completed' as const,
+        skipped: 'skipped' as const,
+        error: 'error' as const,
+      });
       const errorDetail = extractErrorDetail(result);
 
       if (mappedStatus === 'error') {
-        return { status: 'error', targetItemIds: params.itemIds, note: errorDetail ?? 'Failed to get transcription.', error: errorDetail };
+        return {
+          status: 'error',
+          targetItemIds: params.itemIds,
+          note: errorDetail ?? 'Failed to get transcription.',
+          error: errorDetail,
+        };
       }
 
       const outputData = result.output ?? {};
       const words = outputData.words as TranscriptionWord[] | undefined;
       const fps = typeof outputData.fps === 'number' ? outputData.fps : 30;
-      const { totalMinutes } = formatTranscriptionSummary(words ?? [], fps);
+      const { generalization, totalMinutes } = buildTranscriptionGeneralization({
+        words: words ?? [],
+        fps,
+      });
 
       return {
         status: mappedStatus,
@@ -260,10 +351,12 @@ export function createGetTranscriptionTool(
         wordCount: typeof outputData.wordCount === 'number' ? outputData.wordCount : undefined,
         itemCount: typeof outputData.itemCount === 'number' ? outputData.itemCount : undefined,
         totalMinutes,
+        generalization,
         note: reason ?? 'Transcription prepared successfully in the timeline.',
       };
     },
-    toModelOutput: ({ output }: { output: GetTranscriptionResult }) => buildTranscriptionStatusModelOutput(output),
+    toModelOutput: ({ output }: { output: GetTranscriptionResult }) =>
+      buildTranscriptionStatusModelOutput(output),
   } as unknown as Tool<GetTranscriptionInput, GetTranscriptionResult>;
 }
 
@@ -291,9 +384,14 @@ export function createGetDetailedTranscriptionTool(
       itemIds: z.array(z.string().trim().min(1)).optional(),
       reason: z.string().trim().max(200).optional(),
     }),
-    execute: async ({ minutes, itemIds, reason }: GetDetailedTranscriptionInput, { toolCallId }: { toolCallId?: string }) => {
+    execute: async (
+      { minutes, itemIds, reason }: GetDetailedTranscriptionInput,
+      { toolCallId }: { toolCallId?: string },
+    ) => {
       const resolvedToolCallId = toolCallId ?? `get-detailed-transcription-${Date.now()}`;
-      const normalizedMinutes = Array.from(new Set(minutes.filter((minute) => minute >= 1))).sort((a, b) => a - b);
+      const normalizedMinutes = Array.from(new Set(minutes.filter((minute) => minute >= 1))).sort(
+        (a, b) => a - b,
+      );
 
       if (normalizedMinutes.length === 0) {
         return {
@@ -312,7 +410,9 @@ export function createGetDetailedTranscriptionTool(
       }
 
       const waitForResult = deps.waitForToolResult(resolvedToolCallId);
-      const normalizedItemIds = itemIds ? Array.from(new Set(itemIds.map((id) => id.trim()).filter((id) => id.length > 0))) : undefined;
+      const normalizedItemIds = itemIds
+        ? Array.from(new Set(itemIds.map((id) => id.trim()).filter((id) => id.length > 0)))
+        : undefined;
       const params: EditorGetDetailedTranscriptionPayload['params'] = {
         minutes: normalizedMinutes.map((minute) => minute - 1),
         itemIds: normalizedItemIds?.length ? normalizedItemIds : undefined,
@@ -320,31 +420,60 @@ export function createGetDetailedTranscriptionTool(
 
       deps.realtimeService.dispatchMessage({
         type: realtimeMessageTypes.editor,
-        payload: { tool_name: editorToolNames.getDetailedTranscription, params, toolCallId: resolvedToolCallId, messageId: context?.messageId, requestedAt: new Date().toISOString() },
+        payload: {
+          tool_name: editorToolNames.getDetailedTranscription,
+          params,
+          toolCallId: resolvedToolCallId,
+          messageId: context?.messageId,
+          requestedAt: new Date().toISOString(),
+        },
         timestamp: new Date().toISOString(),
       });
 
       const result = await waitForResult;
       if ('status' in result && result.status === 'timeout') {
-        return { status: 'timeout', minutes: normalizedMinutes, targetItemIds: params.itemIds, note: 'No response received from editor.' };
+        return {
+          status: 'timeout',
+          minutes: normalizedMinutes,
+          targetItemIds: params.itemIds,
+          note: 'No response received from editor.',
+        };
       }
 
-      const mappedStatus = mapToolResultStatus(result.status, { success: 'completed' as const, skipped: 'skipped' as const, error: 'error' as const });
+      const mappedStatus = mapToolResultStatus(result.status, {
+        success: 'completed' as const,
+        skipped: 'skipped' as const,
+        error: 'error' as const,
+      });
       const errorDetail = extractErrorDetail(result);
 
       if (mappedStatus === 'error') {
-        return { status: 'error', minutes: normalizedMinutes, targetItemIds: params.itemIds, note: errorDetail ?? 'Failed to get detailed transcription.', error: errorDetail };
+        return {
+          status: 'error',
+          minutes: normalizedMinutes,
+          targetItemIds: params.itemIds,
+          note: errorDetail ?? 'Failed to get detailed transcription.',
+          error: errorDetail,
+        };
       }
 
       const outputData = result.output ?? {};
       const note = `Retrieved ${outputData.wordCount ?? 'unknown'} words for minute(s): ${normalizedMinutes.join(', ')}.`;
+      const transcription = outputData.words as TranscriptionWord[] | undefined;
+      const fps = typeof outputData.fps === 'number' ? outputData.fps : 30;
+      const { generalization } = buildTranscriptionGeneralization({
+        words: transcription ?? [],
+        fps,
+        maxCharacters: 6000,
+      });
 
       return {
         status: mappedStatus,
         minutes: normalizedMinutes,
         targetItemIds: (outputData.targetItemIds as string[]) ?? params.itemIds,
         wordCount: typeof outputData.wordCount === 'number' ? outputData.wordCount : undefined,
-        transcription: outputData.words as TranscriptionWord[] | undefined,
+        transcription,
+        generalization,
         note: reason ?? note,
       };
     },

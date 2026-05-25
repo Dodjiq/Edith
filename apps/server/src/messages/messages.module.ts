@@ -5,7 +5,7 @@ import { ConfigModule } from '@nestjs/config';
 import { AiGatewayService } from '../ai-gateway/ai-gateway.service';
 import { RealtimeModule } from '../realtime/realtime.module';
 import { ToolsModule } from '../ai-gateway/tools/tools.module';
-import { PromptsService } from 'src/prompts/prompts.service';
+import { PromptsService } from '../prompts/prompts.service';
 
 @Module({
   imports: [ConfigModule, RealtimeModule, ToolsModule],

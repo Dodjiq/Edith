@@ -13,14 +13,13 @@ import { Readable } from 'stream';
 import { pipeline } from 'stream/promises';
 import { randomUUID } from 'crypto';
 import { resolve, dirname } from 'path';
-import { DeepgramWord } from '../deepgram/deepgram.service';
-import { SpeechmaticsService } from '../speechmatics/speechmatics.service';
+import { ElevenlabsService } from '../elevenlabs/elevenlabs.service';
 
 @Injectable()
 export class CaptionsService {
   private readonly logger = new Logger(CaptionsService.name);
 
-  constructor(private readonly speechmaticsService: SpeechmaticsService) {}
+  constructor(private readonly elevenlabsService: ElevenlabsService) {}
 
   async generateCaptions({ fileKey }: GenerateCaptionsRequest): Promise<GenerateCaptionsResponse> {
     const aws = this.getAwsConfig();
@@ -75,22 +74,16 @@ export class CaptionsService {
       throw new Error('No file content received from S3');
     }
 
-    this.logger.debug('Starting transcription with Speechmatics');
+    this.logger.debug('Starting transcription with ElevenLabs Scribe v2');
 
     try {
-      // Transcribe using SpeechmaticsService (it will also delete the temp file)
-      const result = await this.speechmaticsService.transcribe({
+      const transcription = await this.elevenlabsService.transcribe({
         input: tempFilePath,
         originalLanguage: 'auto-detect',
       });
 
-      this.logger.debug(`Transcription completed. Duration: ${result.metadata?.duration}s`);
-
-      // Extract words from the first channel's first alternative
-      const words = result.results?.channels?.[0]?.alternatives?.[0]?.words ?? [];
-      this.logger.debug(`Found ${words.length} words in transcription`);
-
-      const captions = this.transformWordsToRemotionCaptions(words);
+      this.logger.debug(`Found ${transcription.captions.length} words in transcription`);
+      const captions = this.formatCaptionsForRemotion(transcription.captions);
 
       // Delete S3 file after processing
       await this.deleteS3File(client, aws.bucket, resolvedKey);
@@ -139,7 +132,9 @@ export class CaptionsService {
       this.logger.debug(`Fetched ${captions.length} captions from S3: ${captionsKey}`);
       return { captions };
     } catch (error) {
-      this.logger.error(`Failed to fetch captions: ${error instanceof Error ? error.message : String(error)}`);
+      this.logger.error(
+        `Failed to fetch captions: ${error instanceof Error ? error.message : String(error)}`,
+      );
       throw new Error('Failed to fetch captions');
     }
   }
@@ -174,25 +169,11 @@ export class CaptionsService {
     }
   }
 
-  private transformWordsToRemotionCaptions(words: DeepgramWord[]): Caption[] {
-    const captions: Caption[] = [];
-    let isFirstWord = true;
-
-    for (const word of words) {
-      const text = isFirstWord ? (word.punctuated_word ?? word.word) : ` ${word.punctuated_word ?? word.word}`;
-
-      captions.push({
-        text,
-        startMs: Math.round(word.start * 1000),
-        endMs: Math.round(word.end * 1000),
-        timestampMs: Math.round(((word.start + word.end) / 2) * 1000),
-        confidence: word.confidence,
-      });
-
-      isFirstWord = false;
-    }
-
-    return captions;
+  private formatCaptionsForRemotion(captions: Caption[]): Caption[] {
+    return captions.map((caption, index) => ({
+      ...caption,
+      text: index === 0 ? caption.text : ` ${caption.text}`,
+    }));
   }
 
   private getAwsConfig() {

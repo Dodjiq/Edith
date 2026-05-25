@@ -6,14 +6,18 @@ function formatScopedProjectState(projectState?: DigestProjectStateRequest, item
   }
 
   const scopedIds = itemIds?.length ? new Set(itemIds) : null;
-  const scopedItems = projectState.projectItemsInfo.filter((item) => !scopedIds || scopedIds.has(item.itemId));
+  const scopedItems = projectState.projectItemsInfo.filter(
+    (item) => !scopedIds || scopedIds.has(item.itemId),
+  );
   const itemLines = (scopedItems.length > 0 ? scopedItems : projectState.projectItemsInfo)
     .slice(0, 12)
     .map((item) => {
       const timelineStart =
         typeof item.startFromInSeconds === 'number' ? `${item.startFromInSeconds.toFixed(2)}s` : 'unknown';
-      const timelineEnd = typeof item.endAtInSeconds === 'number' ? `${item.endAtInSeconds.toFixed(2)}s` : 'unknown';
-      const duration = typeof item.durationInSeconds === 'number' ? `${item.durationInSeconds.toFixed(2)}s` : 'unknown';
+      const timelineEnd =
+        typeof item.endAtInSeconds === 'number' ? `${item.endAtInSeconds.toFixed(2)}s` : 'unknown';
+      const duration =
+        typeof item.durationInSeconds === 'number' ? `${item.durationInSeconds.toFixed(2)}s` : 'unknown';
       const audioState = item.hasAudioTrack ? 'has audio' : 'no audio';
       return `- ${item.itemId}: ${item.fileName} (${item.fileType}), timeline ${timelineStart} -> ${timelineEnd}, duration ${duration}, ${audioState}`;
     });
@@ -53,7 +57,7 @@ You are a transcription investigation specialist for an AI video editor.
 You support a main editing agent by investigating transcript and timeline data.
 Stay focused on the assigned task only.
 Use ${editorToolNames.getDetailedTranscription} when you need transcript evidence, but limit each call to 10 minutes.
-Use ${editorToolNames.getTranscription} first when you need totalMinutes before splitting a longer request.
+Use ${editorToolNames.getTranscription} first to get totalMinutes and a compact transcript generalization before splitting a longer request.
 Use ${repetitionToolName} when you want heuristic help spotting local repeated words or short repeated phrases.
 Use ${editorToolNames.getProjectState} or ${editorToolNames.getItemsData} only when the task needs extra context.
 Always inspect transcript evidence before concluding. Do not guess.
@@ -64,7 +68,8 @@ You may find valid bad takes that the helper missed, and you must ignore helper 
 If the transcript does not contain enough evidence, say that clearly.
 If you do not find what the main agent asked for, say that clearly instead of inventing findings.
 Explicitly mention uncertainty when data is missing.
-Your final response must be valid JSON with "answer" and "findings" fields, and it must not use markdown fences.
+Your final response must be valid JSON with "answer", "generalization", and "findings" fields, and it must not use markdown fences.
+The "generalization" field must be a well-written, compact orientation for the main model: what the transcript appears to contain, what parts are relevant to the task, and where uncertainty remains.
 ${requiresCutRanges ? `This task feeds ${cutToolName}. Every finding MUST include label, startTimeInSeconds, endTimeInSeconds, reason, and confidence. Omit any finding that is not timestampable with confidence.` : 'Use findings only when they help the main agent act on the task.'}
 
 <INVESTIGATION_SCOPE>

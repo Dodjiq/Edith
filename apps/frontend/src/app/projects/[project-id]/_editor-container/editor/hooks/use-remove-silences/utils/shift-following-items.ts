@@ -6,11 +6,7 @@ type ShiftFollowingItemsParams = {
   shiftBy: number;
 };
 
-export const shiftFollowingItems = ({
-  trackIndex,
-  pivotFrame,
-  shiftBy,
-}: ShiftFollowingItemsParams) => {
+export const shiftFollowingItems = ({ trackIndex, pivotFrame, shiftBy }: ShiftFollowingItemsParams) => {
   return (prevState: EditorState): EditorState => {
     const { tracks, items } = prevState.undoableState;
     const track = tracks[trackIndex];
@@ -20,7 +16,7 @@ export const shiftFollowingItems = ({
       const item = nextItems[id];
       if (!item) continue;
 
-      if (item.from > pivotFrame) {
+      if (item.from >= pivotFrame) {
         nextItems[id] = {
           ...item,
           from: Math.max(0, item.from - shiftBy),

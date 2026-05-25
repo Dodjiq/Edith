@@ -1,5 +1,5 @@
 import { Caption } from '@remotion/captions';
-import type { TwelveLabsVideoReference, VideoAnalysisSummary } from 'api-types';
+import type { TranscriptionMetadata, TwelveLabsVideoReference, VideoAnalysisSummary } from 'api-types';
 
 export type AssetUploadProgress = {
   progress: number;
@@ -76,6 +76,7 @@ export type VideoAsset = BaseAsset & {
   lowResAssetUrl?: string;
   /** Pre-computed transcription from upload (word-level captions) */
   transcription?: Caption[];
+  transcriptionMetadata?: TranscriptionMetadata;
   /** TwelveLabs index reference for later interactions */
   twelveLabs?: TwelveLabsVideoReference;
   /** Multi-pass analysis summary generated after upload */
@@ -100,6 +101,7 @@ export type AudioAsset = BaseAsset & {
   durationInSeconds: number;
   /** Pre-computed transcription from upload (word-level captions) */
   transcription?: Caption[];
+  transcriptionMetadata?: TranscriptionMetadata;
   /**
    * True when the asset was successfully processed but contains no speech to transcribe.
    * Different from missing transcription - the asset simply has no spoken content.

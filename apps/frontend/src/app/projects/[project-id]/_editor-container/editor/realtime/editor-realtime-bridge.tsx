@@ -30,6 +30,7 @@ import {
   CaptionStyleInput,
   FrameRange,
   RealtimeMessage,
+  removeSilencesDetectionModes,
   realtimeMessageTypes,
 } from 'api-types';
 import { useWebSocket } from '@/app/WebSocketProvider';
@@ -150,8 +151,15 @@ const isRemoveSilencesPayload = (payload: unknown): payload is EditorRemoveSilen
     return false;
   }
 
-  const { targetItemId, noiseThresholdInDecibels, minDurationInSeconds, paddingInSeconds, detectionsByItemId } =
-    params as Record<string, unknown>;
+  const {
+    targetItemId,
+    itemIds,
+    noiseThresholdInDecibels,
+    minDurationInSeconds,
+    paddingInSeconds,
+    detectionMode,
+    detectionsByItemId,
+  } = params as Record<string, unknown>;
 
   const isValidNumberOrUndefined = (value: unknown) => typeof value === 'number' || value === undefined;
   const isTimeRange = (value: unknown) => {
@@ -183,9 +191,13 @@ const isRemoveSilencesPayload = (payload: unknown): payload is EditorRemoveSilen
   return (
     casted.tool_name === editorToolNames.removeSilences &&
     (typeof targetItemId === 'string' || targetItemId === undefined) &&
+    (Array.isArray(itemIds) ? itemIds.every((id) => typeof id === 'string') : itemIds === undefined) &&
     isValidNumberOrUndefined(noiseThresholdInDecibels) &&
     isValidNumberOrUndefined(minDurationInSeconds) &&
     isValidNumberOrUndefined(paddingInSeconds) &&
+    (typeof detectionMode === 'string'
+      ? removeSilencesDetectionModes.includes(detectionMode as (typeof removeSilencesDetectionModes)[number])
+      : detectionMode === undefined) &&
     isValidDetectionsMap(detectionsByItemId)
   );
 };
