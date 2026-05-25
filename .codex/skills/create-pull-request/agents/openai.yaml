@@ -1,0 +1,4 @@
+interface:
+  display_name: "Create Pull Request"
+  short_description: "Review, build, branch, and open a GitHub PR"
+  default_prompt: "Use $create-pull-request to review changes, verify builds, create a branch, and open a PR from main."

@@ -5,6 +5,7 @@ import { TwelveLabs } from 'twelvelabs-js';
 type TwelveLabsIndexStrategy = 'global' | 'project';
 type TwelveLabsAnalyzeRequest = Parameters<TwelveLabs['analyze']>[0];
 type TwelveLabsResponseFormat = TwelveLabsAnalyzeRequest['responseFormat'];
+type TwelveLabsVideoContext = NonNullable<TwelveLabsAnalyzeRequest['video']>;
 
 export type TwelveLabsVideoIndexResult = {
   indexId: string;
@@ -293,15 +294,27 @@ export class TwelveLabsService {
 
   async analyzeVideo({
     videoId,
+    videoUrl,
     prompt,
     responseFormat,
   }: {
-    videoId: string;
+    videoId?: string;
+    videoUrl?: string;
     prompt: string;
     responseFormat?: TwelveLabsResponseFormat;
   }): Promise<string> {
+    if (!videoUrl && !videoId) {
+      throw new Error('TwelveLabs analysis requires either videoUrl or videoId');
+    }
+
     const client = this.getClient();
-    const request: TwelveLabsAnalyzeRequest = { videoId, prompt };
+    const request: TwelveLabsAnalyzeRequest = videoUrl
+      ? {
+          modelName: 'pegasus1.5',
+          video: { type: 'url', url: videoUrl } satisfies TwelveLabsVideoContext,
+          prompt,
+        }
+      : { videoId, prompt };
 
     if (responseFormat) {
       request.responseFormat = responseFormat;

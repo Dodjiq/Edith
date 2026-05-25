@@ -35,11 +35,4 @@ temporary-files/
 # Local tool and editor state
 .DS_Store
 .playwright-mcp/
-.claude/
-.codex/
-.agents/
-.cursor/
-.cursorignore
-.cursor/skills/
-.cursor/rules/
 .vscode/

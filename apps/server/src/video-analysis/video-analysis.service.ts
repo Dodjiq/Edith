@@ -8,7 +8,6 @@ import { TwelveLabsService } from './twelve-labs/twelve-labs.service';
 const MIN_VIDEO_ANALYSIS_DURATION_SECONDS = 4;
 const VIDEO_ANALYSIS_JSON_SCHEMA = {
   type: 'object',
-  additionalProperties: false,
   required: ['macroView', 'causalLogic', 'sequentialSummary', 'socket', 'plug'],
   properties: {
     macroView: { type: 'string' },
@@ -99,7 +98,7 @@ export class VideoAnalysisService {
     this.logger.debug(`[TIMING] [12LABS] Starting combined analysis for assetId=${assetId} indexId=${indexId}`);
     const analysisStart = Date.now();
     const analysisResponse = await this.twelveLabsService.analyzeVideo({
-      videoId,
+      videoUrl: presignedUrl,
       prompt: combinedPrompt,
       responseFormat: VIDEO_ANALYSIS_RESPONSE_FORMAT,
     });

@@ -87,4 +87,59 @@ describe('TwelveLabsService', () => {
     ).rejects.toBe(error);
     expect(create).toHaveBeenCalledTimes(1);
   });
+
+  it('analyzes direct video URLs with Pegasus 1.5', async () => {
+    const analyze = jest.fn().mockResolvedValue({ data: 'analysis result' });
+    const serviceWithInternals = service as unknown as {
+      client: unknown;
+    };
+
+    serviceWithInternals.client = { analyze };
+
+    await expect(
+      service.analyzeVideo({
+        videoUrl: 'https://example.com/video.mp4',
+        prompt: 'Describe the video',
+      }),
+    ).resolves.toBe('analysis result');
+
+    expect(analyze).toHaveBeenCalledWith(
+      {
+        modelName: 'pegasus1.5',
+        video: { type: 'url', url: 'https://example.com/video.mp4' },
+        prompt: 'Describe the video',
+      },
+      { timeoutInSeconds: 120 },
+    );
+  });
+
+  it('keeps legacy videoId analysis as a fallback', async () => {
+    const analyze = jest.fn().mockResolvedValue({ data: 'legacy result' });
+    const serviceWithInternals = service as unknown as {
+      client: unknown;
+    };
+
+    serviceWithInternals.client = { analyze };
+
+    await expect(
+      service.analyzeVideo({
+        videoId: 'video-1',
+        prompt: 'Describe the video',
+      }),
+    ).resolves.toBe('legacy result');
+
+    expect(analyze).toHaveBeenCalledWith(
+      {
+        videoId: 'video-1',
+        prompt: 'Describe the video',
+      },
+      { timeoutInSeconds: 120 },
+    );
+  });
+
+  it('rejects analysis requests without a video source', async () => {
+    await expect(service.analyzeVideo({ prompt: 'Describe the video' })).rejects.toThrow(
+      'TwelveLabs analysis requires either videoUrl or videoId',
+    );
+  });
 });
