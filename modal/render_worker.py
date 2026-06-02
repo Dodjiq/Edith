@@ -5,9 +5,9 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
+import httpx
 import modal
 from fastapi import HTTPException, Request
-from supabase import create_client
 
 
 app = modal.App("edith-render-worker")
@@ -32,8 +32,66 @@ def _require_env(name: str) -> str:
     return value
 
 
-def _supabase():
-    return create_client(_require_env("SUPABASE_URL"), _require_env("SUPABASE_SERVICE_ROLE_KEY"))
+class SupabaseRestClient:
+    def __init__(self) -> None:
+        self.url = _require_env("SUPABASE_URL").rstrip("/")
+        self.service_key = _require_env("SUPABASE_SERVICE_ROLE_KEY")
+        self.headers = {
+            "apikey": self.service_key,
+            "Authorization": f"Bearer {self.service_key}",
+        }
+
+    def update(self, table: str, filters: dict[str, str], values: dict[str, Any]) -> None:
+        response = httpx.patch(
+            f"{self.url}/rest/v1/{table}",
+            params={field: f"eq.{value}" for field, value in filters.items()},
+            headers={**self.headers, "Content-Type": "application/json"},
+            json=values,
+            timeout=60,
+        )
+        response.raise_for_status()
+
+    def insert(self, table: str, values: dict[str, Any]) -> None:
+        response = httpx.post(
+            f"{self.url}/rest/v1/{table}",
+            headers={**self.headers, "Content-Type": "application/json"},
+            json=values,
+            timeout=60,
+        )
+        response.raise_for_status()
+
+    def select_variants(self, project_id: str, limit: int) -> list[dict[str, Any]]:
+        response = httpx.get(
+            f"{self.url}/rest/v1/video_variants",
+            params={
+                "select": "id,name,hook_text,edit_plan",
+                "project_id": f"eq.{project_id}",
+                "order": "created_at.asc",
+                "limit": str(limit),
+            },
+            headers=self.headers,
+            timeout=60,
+        )
+        response.raise_for_status()
+        return response.json()
+
+    def download_storage_file(self, bucket: str, storage_path: str, output_path: Path) -> None:
+        response = httpx.get(
+            f"{self.url}/storage/v1/object/{bucket}/{storage_path}",
+            headers=self.headers,
+            timeout=300,
+        )
+        response.raise_for_status()
+        output_path.write_bytes(response.content)
+
+    def upload_storage_file(self, bucket: str, storage_path: str, file_path: Path, content_type: str) -> None:
+        response = httpx.post(
+            f"{self.url}/storage/v1/object/{bucket}/{storage_path}",
+            headers={**self.headers, "Content-Type": content_type, "x-upsert": "true"},
+            content=file_path.read_bytes(),
+            timeout=300,
+        )
+        response.raise_for_status()
 
 
 def _resolution_filter(format_value: str) -> str:
@@ -88,19 +146,6 @@ def _transcribe_if_enabled(audio_path: Path, language: str) -> dict[str, Any]:
     }
 
 
-def _download_storage_file(client, bucket: str, storage_path: str, output_path: Path) -> None:
-    data = client.storage.from_(bucket).download(storage_path)
-    output_path.write_bytes(data)
-
-
-def _upload_storage_file(client, bucket: str, storage_path: str, file_path: Path, content_type: str) -> None:
-    client.storage.from_(bucket).upload(
-        storage_path,
-        file_path.read_bytes(),
-        file_options={"content-type": content_type, "upsert": "true"},
-    )
-
-
 @app.function(image=image, secrets=secrets, timeout=60 * 60)
 def render_project(
     project_id: str,
@@ -113,24 +158,25 @@ def render_project(
     variants_count: int,
     language: str = "fr",
 ) -> dict:
-    client = _supabase()
+    client = SupabaseRestClient()
     bucket = os.environ.get("SUPABASE_STORAGE_BUCKET", "videos")
 
     try:
-        client.table("projects").update({"status": "transcribing"}).eq("id", project_id).execute()
-        client.table("render_jobs").update({"status": "transcribing"}).eq("project_id", project_id).execute()
+        client.update("projects", {"id": project_id}, {"status": "transcribing"})
+        client.update("render_jobs", {"project_id": project_id}, {"status": "transcribing"})
 
         with tempfile.TemporaryDirectory() as temp_dir:
             workspace = Path(temp_dir)
             source_path = workspace / "source.mp4"
             audio_path = workspace / "audio.mp3"
 
-            _download_storage_file(client, bucket, storage_path, source_path)
+            client.download_storage_file(bucket, storage_path, source_path)
             _extract_audio(source_path, audio_path)
             transcription = _transcribe_if_enabled(audio_path, language)
 
             if transcription["segments"] or transcription["full_text"]:
-                client.table("transcriptions").insert(
+                client.insert(
+                    "transcriptions",
                     {
                         "project_id": project_id,
                         "asset_id": asset_id,
@@ -139,20 +185,12 @@ def render_project(
                         "language": transcription.get("language", language),
                         "full_text": transcription["full_text"],
                         "transcription_segments": transcription["segments"],
-                    }
-                ).execute()
+                    },
+                )
 
-            client.table("projects").update({"status": "rendering"}).eq("id", project_id).execute()
-            client.table("render_jobs").update({"status": "rendering"}).eq("project_id", project_id).execute()
-
-            variants_response = (
-                client.table("video_variants")
-                .select("id,name,hook_text,edit_plan")
-                .eq("project_id", project_id)
-                .order("created_at")
-                .execute()
-            )
-            variants = variants_response.data[:variants_count]
+            client.update("projects", {"id": project_id}, {"status": "rendering"})
+            client.update("render_jobs", {"project_id": project_id}, {"status": "rendering"})
+            variants = client.select_variants(project_id, variants_count)
 
             for index, variant in enumerate(variants):
                 variant_id = variant["id"]
@@ -160,7 +198,7 @@ def render_project(
                 output_path = workspace / f"{variant_id}.mp4"
                 export_path = f"{user_id}/{project_id}/exports/{variant_id}.mp4"
 
-                client.table("video_variants").update({"status": "rendering"}).eq("id", variant_id).execute()
+                client.update("video_variants", {"id": variant_id}, {"status": "rendering"})
                 _run(
                     [
                         "ffmpeg",
@@ -184,8 +222,10 @@ def render_project(
                         str(output_path),
                     ]
                 )
-                _upload_storage_file(client, bucket, export_path, output_path, "video/mp4")
-                client.table("video_variants").update(
+                client.upload_storage_file(bucket, export_path, output_path, "video/mp4")
+                client.update(
+                    "video_variants",
+                    {"id": variant_id},
                     {
                         "status": "completed",
                         "export_path": export_path,
@@ -195,17 +235,17 @@ def render_project(
                             "instructions": instructions,
                             "modal": "completed",
                         },
-                    }
-                ).eq("id", variant_id).execute()
+                    },
+                )
 
-        client.table("projects").update({"status": "completed"}).eq("id", project_id).execute()
-        client.table("render_jobs").update({"status": "completed"}).eq("project_id", project_id).execute()
+        client.update("projects", {"id": project_id}, {"status": "completed"})
+        client.update("render_jobs", {"project_id": project_id}, {"status": "completed"})
         return {"status": "completed", "project_id": project_id}
     except Exception as error:
         message = str(error)
-        client.table("projects").update({"status": "failed", "error_message": message}).eq("id", project_id).execute()
-        client.table("render_jobs").update({"status": "failed", "error_message": message}).eq("project_id", project_id).execute()
-        client.table("video_variants").update({"status": "failed", "error_message": message}).eq("project_id", project_id).execute()
+        client.update("projects", {"id": project_id}, {"status": "failed", "error_message": message})
+        client.update("render_jobs", {"project_id": project_id}, {"status": "failed", "error_message": message})
+        client.update("video_variants", {"project_id": project_id}, {"status": "failed", "error_message": message})
         raise
 
 

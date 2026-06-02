@@ -37,6 +37,8 @@ MODAL_WEBHOOK_SECRET=...
 
 The worker is expected to download a source video from Supabase Storage, extract audio with FFmpeg, transcribe with faster-whisper, generate an edit plan, render variants with FFmpeg, upload exports, and update Postgres statuses.
 
+The worker uses Supabase REST and Storage HTTP endpoints through `httpx` instead of `supabase-py`. This avoids a Windows deploy import conflict because the repo also has a local `supabase/` schema folder.
+
 ## Mock mode
 
 `ENABLE_MOCK_RENDER=true` in the Next.js app simulates jobs and variants while Supabase/Modal are not connected.
