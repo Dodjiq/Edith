@@ -122,9 +122,65 @@ def _extract_audio(source_path: Path, audio_path: Path) -> None:
     _run(["ffmpeg", "-y", "-i", str(source_path), "-vn", "-acodec", "mp3", str(audio_path)])
 
 
+def _normalize_space_transcription(result: Any, language: str) -> dict[str, Any]:
+    if isinstance(result, dict):
+        text = result.get("text") or result.get("transcription") or result.get("full_text") or ""
+        segments = result.get("segments") or result.get("chunks") or []
+        normalized_segments = [
+            {
+                "start": segment.get("start", 0),
+                "end": segment.get("end", 0),
+                "text": str(segment.get("text", "")).strip(),
+            }
+            for segment in segments
+            if isinstance(segment, dict)
+        ]
+        return {
+            "provider": "huggingface-space",
+            "language": result.get("language") or language,
+            "full_text": str(text).strip(),
+            "segments": normalized_segments,
+        }
+
+    if isinstance(result, (list, tuple)):
+        text_parts = [item for item in result if isinstance(item, str)]
+        return {
+            "provider": "huggingface-space",
+            "language": language,
+            "full_text": " ".join(text_parts).strip(),
+            "segments": [],
+        }
+
+    return {
+        "provider": "huggingface-space",
+        "language": language,
+        "full_text": str(result).strip(),
+        "segments": [],
+    }
+
+
+def _transcribe_with_huggingface_space(audio_path: Path, language: str) -> dict[str, Any]:
+    from gradio_client import Client, handle_file
+
+    space_url = os.environ.get("HF_WHISPER_SPACE_URL", "https://dodjiq-ads-voice.hf.space")
+    api_name = os.environ.get("HF_WHISPER_API_NAME", "/predict")
+    hf_token = os.environ.get("HF_TOKEN") or None
+    client = Client(space_url, hf_token=hf_token)
+
+    try:
+        result = client.predict(handle_file(str(audio_path)), language, api_name=api_name)
+    except TypeError:
+        result = client.predict(handle_file(str(audio_path)), api_name=api_name)
+
+    return _normalize_space_transcription(result, language)
+
+
 def _transcribe_if_enabled(audio_path: Path, language: str) -> dict[str, Any]:
     if os.environ.get("ENABLE_REAL_TRANSCRIPTION", "false").lower() != "true":
         return {"full_text": "", "segments": []}
+
+    if os.environ.get("ENABLE_HF_WHISPER", "false").lower() == "true":
+        return _transcribe_with_huggingface_space(audio_path, language)
 
     from faster_whisper import WhisperModel
 
@@ -140,6 +196,7 @@ def _transcribe_if_enabled(audio_path: Path, language: str) -> dict[str, Any]:
         for segment in segments
     ]
     return {
+        "provider": "faster-whisper",
         "language": info.language,
         "full_text": " ".join(segment["text"] for segment in normalized_segments).strip(),
         "segments": normalized_segments,
@@ -181,7 +238,7 @@ def render_project(
                         "project_id": project_id,
                         "asset_id": asset_id,
                         "user_id": user_id,
-                        "provider": "faster-whisper",
+                        "provider": transcription.get("provider", "faster-whisper"),
                         "language": transcription.get("language", language),
                         "full_text": transcription["full_text"],
                         "transcription_segments": transcription["segments"],
