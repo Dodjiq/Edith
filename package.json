@@ -9,6 +9,7 @@
     "build": "turbo run build",
     "dev": "turbo run dev",
     "dev:direct": "PORTLESS=0 turbo run dev",
+    "pages:build": "pnpm --filter api-types build && cd apps/frontend && npx @cloudflare/next-on-pages@1",
     "portless:list": "portless list",
     "portless:proxy": "portless proxy start",
     "test": "pnpm --filter server exec jest --runInBand && pnpm --filter media-processor test",
