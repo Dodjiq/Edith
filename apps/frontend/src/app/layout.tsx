@@ -34,7 +34,7 @@ const poppins = localFont({
 export const metadata: Metadata = {
   title: 'Edith',
   description:
-    'Edith is a video editor powered by AI. It allows you to edit videos with ease and create professional videos in no time.',
+    'Edith transforme des rushs produit en variantes publicitaires video pretes a tester pour e-commerce et dropshipping.',
   icons: {
     icon: '/icon.svg',
   },
