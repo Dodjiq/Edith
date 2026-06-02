@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "remotion:studio": "npx remotion studio",
-    "remotion:deploy": "npx remotion lambda sites create --site-name=remotion-framedeck"
+    "remotion:deploy": "npx remotion lambda sites create --site-name=remotion-edith"
   },
   "dependencies": {
     "@base-ui/react": "^1.4.1",

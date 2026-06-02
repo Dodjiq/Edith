@@ -7,9 +7,9 @@ if [ "${PORTLESS:-1}" = "0" ]; then
   exec pnpm exec next dev
 fi
 
-backend_url="$(bash ../../scripts/portless-url.sh api-ai-video-editor)"
+backend_url="$(bash ../../scripts/portless-url.sh api-edith)"
 
 export NEXT_PUBLIC_BASE_URL_BACKEND="$backend_url"
 export NEXT_PUBLIC_BASE_URL_WEBSOCKET="$backend_url"
 
-exec bash ../../scripts/run-with-portless.sh ai-video-editor pnpm exec next dev
+exec bash ../../scripts/run-with-portless.sh edith pnpm exec next dev

@@ -1,4 +1,4 @@
-/* Auto-generated from the existing Framedeck registry and Motion Studio source metadata. */
+/* Auto-generated from the existing Edith registry and Motion Studio source metadata. */
 import type { MotionDesignTemplate, MotionDesignTemplateId } from './types';
 
 export const legacyMotionDesignTemplates = [
@@ -54,7 +54,7 @@ export const legacyMotionDesignTemplates = [
         "step": 1
       }
     ],
-    "source": "framedeck",
+    "source": "edith",
     "detail": "Choose for a polished hero title, chapter opener, or short important phrase that should feel cinematic and premium.",
     "defaultBox": "center",
     "supportsEffects": false
@@ -110,7 +110,7 @@ export const legacyMotionDesignTemplates = [
         "step": 1
       }
     ],
-    "source": "framedeck",
+    "source": "edith",
     "detail": "Choose for the safest readable text overlay when the user asks for something subtle, clean, minimal, or non-distracting.",
     "defaultBox": "center",
     "supportsEffects": false
@@ -166,7 +166,7 @@ export const legacyMotionDesignTemplates = [
         "step": 1
       }
     ],
-    "source": "framedeck",
+    "source": "edith",
     "detail": "Choose for quotes, hooks, punchlines, or educational text where each word should land with spoken pacing.",
     "defaultBox": "center",
     "supportsEffects": false
@@ -222,7 +222,7 @@ export const legacyMotionDesignTemplates = [
         "step": 1
       }
     ],
-    "source": "framedeck",
+    "source": "edith",
     "detail": "Choose for short labels, passwords, tech words, or reveals that should feel precise and mechanical.",
     "defaultBox": "center",
     "supportsEffects": false
@@ -280,7 +280,7 @@ export const legacyMotionDesignTemplates = [
         "step": 1
       }
     ],
-    "source": "framedeck",
+    "source": "edith",
     "detail": "Choose for a title, label, or annotation that should enter from the edge and point attention into the frame.",
     "defaultBox": "center",
     "supportsEffects": false
@@ -336,7 +336,7 @@ export const legacyMotionDesignTemplates = [
         "step": 0.1
       }
     ],
-    "source": "framedeck",
+    "source": "edith",
     "detail": "Choose for cyber, AI, hacking, digital error, signal lock, or high-energy tech reveals.",
     "defaultBox": "center",
     "supportsEffects": false
@@ -393,7 +393,7 @@ export const legacyMotionDesignTemplates = [
         "step": 0.1
       }
     ],
-    "source": "framedeck",
+    "source": "edith",
     "detail": "Choose when several short phrases should rotate through the same position with a digital glitch transition.",
     "defaultBox": "center",
     "supportsEffects": false
@@ -440,7 +440,7 @@ export const legacyMotionDesignTemplates = [
         "step": 0.1
       }
     ],
-    "source": "framedeck",
+    "source": "edith",
     "detail": "Choose as a background texture for coding, cybersecurity, AI, data, or futuristic scenes; keep foreground text readable.",
     "defaultBox": "full-frame",
     "supportsEffects": false
@@ -492,7 +492,7 @@ export const legacyMotionDesignTemplates = [
         "type": "color"
       }
     ],
-    "source": "framedeck",
+    "source": "edith",
     "detail": "Choose for speaker names, roles, interview identifiers, guest introductions, and professional lower-third overlays.",
     "defaultBox": "center",
     "supportsEffects": false
@@ -549,7 +549,7 @@ export const legacyMotionDesignTemplates = [
         "step": 0.25
       }
     ],
-    "source": "framedeck",
+    "source": "edith",
     "detail": "Choose for one sentence or thought that should appear as typed text with a simple cursor.",
     "defaultBox": "center",
     "supportsEffects": false
@@ -607,7 +607,7 @@ export const legacyMotionDesignTemplates = [
         "step": 0.25
       }
     ],
-    "source": "framedeck",
+    "source": "edith",
     "detail": "Choose for terminal commands, build logs, developer workflows, install steps, or command-line storytelling.",
     "defaultBox": "center",
     "supportsEffects": false
@@ -663,7 +663,7 @@ export const legacyMotionDesignTemplates = [
         "step": 0.25
       }
     ],
-    "source": "framedeck",
+    "source": "edith",
     "detail": "Choose when multiple phrases should type one after another, such as benefits, alternatives, or quick examples.",
     "defaultBox": "center",
     "supportsEffects": false
@@ -728,7 +728,7 @@ export const legacyMotionDesignTemplates = [
         "step": 0.25
       }
     ],
-    "source": "framedeck",
+    "source": "edith",
     "detail": "Choose for a typewriter effect that should feel less robotic and more like human typing rhythm.",
     "defaultBox": "center",
     "supportsEffects": false
@@ -745,7 +745,7 @@ export const legacyMotionDesignTemplates = [
     ],
     "defaultDurationInFrames": 150,
     "defaultProps": {
-      "code": "const title = \"Framedeck\";\\nrender(title);",
+      "code": "const title = \"Edith\";\\nrender(title);",
       "primaryColor": "#e5e7eb",
       "accentColor": "#60a5fa",
       "backgroundColor": "#111827",
@@ -782,7 +782,7 @@ export const legacyMotionDesignTemplates = [
         "step": 1
       }
     ],
-    "source": "framedeck",
+    "source": "edith",
     "detail": "Choose for readable code snippets that should reveal line by line while staying stable on screen.",
     "defaultBox": "center",
     "supportsEffects": false
@@ -836,7 +836,7 @@ export const legacyMotionDesignTemplates = [
         "step": 0.25
       }
     ],
-    "source": "framedeck",
+    "source": "edith",
     "detail": "Choose when code should appear as if it is being written live during a tutorial or technical demo.",
     "defaultBox": "center",
     "supportsEffects": false
@@ -895,7 +895,7 @@ export const legacyMotionDesignTemplates = [
         "type": "color"
       }
     ],
-    "source": "framedeck",
+    "source": "edith",
     "detail": "Choose for KPIs, stats, revenue, views, percentages, follower counts, or any metric that should count upward clearly.",
     "defaultBox": "center",
     "supportsEffects": false
@@ -958,7 +958,7 @@ export const legacyMotionDesignTemplates = [
         "step": 0.1
       }
     ],
-    "source": "framedeck",
+    "source": "edith",
     "detail": "Choose for milestone metrics, launch wins, achievements, celebrations, or success moments that need extra energy.",
     "defaultBox": "center",
     "supportsEffects": false
@@ -996,7 +996,7 @@ export const legacyMotionDesignTemplates = [
         "type": "color"
       }
     ],
-    "source": "framedeck",
+    "source": "edith",
     "detail": "Choose for a smooth branded background, calm transition plate, or abstract full-frame color movement.",
     "defaultBox": "full-frame",
     "supportsEffects": false
@@ -1034,7 +1034,7 @@ export const legacyMotionDesignTemplates = [
         "type": "color"
       }
     ],
-    "source": "framedeck",
+    "source": "edith",
     "detail": "Choose for a centered glow, spotlight, reveal around a subject, or soft emphasis behind text.",
     "defaultBox": "full-frame",
     "supportsEffects": false
@@ -1072,7 +1072,7 @@ export const legacyMotionDesignTemplates = [
         "type": "color"
       }
     ],
-    "source": "framedeck",
+    "source": "edith",
     "detail": "Choose for energetic circular color motion, modern abstract backgrounds, or spinning transition accents.",
     "defaultBox": "full-frame",
     "supportsEffects": false
@@ -1119,7 +1119,7 @@ export const legacyMotionDesignTemplates = [
         "step": 0.1
       }
     ],
-    "source": "framedeck",
+    "source": "edith",
     "detail": "Choose for a quick full-frame transition between sections, scenes, or ideas without adding literal objects.",
     "defaultBox": "full-frame",
     "supportsEffects": false
@@ -1165,7 +1165,7 @@ export const legacyMotionDesignTemplates = [
         "step": 0.1
       }
     ],
-    "source": "framedeck",
+    "source": "edith",
     "detail": "Choose for soft ambience, calm scenes, winter mood, dreamy overlays, or gentle visual texture.",
     "defaultBox": "full-frame",
     "supportsEffects": false
@@ -1212,7 +1212,7 @@ export const legacyMotionDesignTemplates = [
         "step": 0.1
       }
     ],
-    "source": "framedeck",
+    "source": "edith",
     "detail": "Choose for an upward burst, reveal hit, product moment, impact beat, or energetic accent from the center.",
     "defaultBox": "full-frame",
     "supportsEffects": false
@@ -1250,7 +1250,7 @@ export const legacyMotionDesignTemplates = [
         "type": "color"
       }
     ],
-    "source": "framedeck",
+    "source": "edith",
     "detail": "Choose for data, systems, dashboards, structure, alignment, or particles resolving into an ordered pattern.",
     "defaultBox": "full-frame",
     "supportsEffects": false
@@ -1288,7 +1288,7 @@ export const legacyMotionDesignTemplates = [
         "type": "color"
       }
     ],
-    "source": "framedeck",
+    "source": "edith",
     "detail": "Choose for warm magical ambience, organic glow, night scenes, soft celebration, or subtle background motion.",
     "defaultBox": "full-frame",
     "supportsEffects": false
@@ -1335,7 +1335,7 @@ export const legacyMotionDesignTemplates = [
         "step": 0.1
       }
     ],
-    "source": "framedeck",
+    "source": "edith",
     "detail": "Choose for a short celebration burst on a button press, milestone, CTA, achievement, or reveal beat.",
     "defaultBox": "full-frame",
     "supportsEffects": false
@@ -1382,7 +1382,7 @@ export const legacyMotionDesignTemplates = [
         "step": 0.1
       }
     ],
-    "source": "framedeck",
+    "source": "edith",
     "detail": "Choose to add light decorative motion around an existing subject without taking over the whole frame.",
     "defaultBox": "full-frame",
     "supportsEffects": false
@@ -1430,7 +1430,7 @@ export const legacyMotionDesignTemplates = [
         "step": 1
       }
     ],
-    "source": "framedeck",
+    "source": "edith",
     "detail": "Choose for immersive keyword clouds, fast conceptual montages, AI brainstorms, or words moving through depth.",
     "defaultBox": "full-frame",
     "supportsEffects": false
@@ -1469,7 +1469,7 @@ export const legacyMotionDesignTemplates = [
         "type": "color"
       }
     ],
-    "source": "framedeck",
+    "source": "edith",
     "detail": "Choose for background columns, credits-like movement, data streams, social proof lists, or repeating visual texture.",
     "defaultBox": "full-frame",
     "supportsEffects": false
@@ -1525,7 +1525,7 @@ export const legacyMotionDesignTemplates = [
         "step": 1
       }
     ],
-    "source": "framedeck",
+    "source": "edith",
     "detail": "Choose for a small group of items, benefits, steps, or labels that should appear one after another.",
     "defaultBox": "center",
     "supportsEffects": false
@@ -1572,7 +1572,7 @@ export const legacyMotionDesignTemplates = [
         "step": 1
       }
     ],
-    "source": "framedeck",
+    "source": "edith",
     "detail": "Choose for dashboards, grids, galleries, feature tiles, or any structured layout that should reveal rhythmically.",
     "defaultBox": "center",
     "supportsEffects": false
@@ -1628,7 +1628,7 @@ export const legacyMotionDesignTemplates = [
         "step": 1
       }
     ],
-    "source": "framedeck",
+    "source": "edith",
     "detail": "Choose for checklists, process steps, takeaways, todo lists, or stacked points that need clean vertical sequencing.",
     "defaultBox": "center",
     "supportsEffects": false
@@ -1675,7 +1675,7 @@ export const legacyMotionDesignTemplates = [
         "step": 1
       }
     ],
-    "source": "framedeck",
+    "source": "edith",
     "detail": "Choose for explaining animation, speed curves, timing, performance, or comparing movement styles.",
     "defaultBox": "center",
     "supportsEffects": false
@@ -1731,7 +1731,7 @@ export const legacyMotionDesignTemplates = [
         "step": 1
       }
     ],
-    "source": "framedeck",
+    "source": "edith",
     "detail": "Choose for dramatic transition moments where a frame, topic, or visual idea breaks apart and reforms.",
     "defaultBox": "full-frame",
     "supportsEffects": false
@@ -1778,7 +1778,7 @@ export const legacyMotionDesignTemplates = [
         "step": 1
       }
     ],
-    "source": "framedeck",
+    "source": "edith",
     "detail": "Choose for multi-tile reveals, collage moments, feature mosaics, or reframing several ideas into one composition.",
     "defaultBox": "full-frame",
     "supportsEffects": false
@@ -1835,7 +1835,7 @@ export const legacyMotionDesignTemplates = [
         "step": 1
       }
     ],
-    "source": "framedeck",
+    "source": "edith",
     "detail": "Choose for stacked concepts, cards, chapters, product features, or storytelling beats with depth.",
     "defaultBox": "center",
     "supportsEffects": false
@@ -1882,7 +1882,7 @@ export const legacyMotionDesignTemplates = [
         "step": 1
       }
     ],
-    "source": "framedeck",
+    "source": "edith",
     "detail": "Choose for a simple depth-based scene intro when the user asks for a 3D feel without specific objects.",
     "defaultBox": "center",
     "supportsEffects": false
@@ -1939,7 +1939,7 @@ export const legacyMotionDesignTemplates = [
         "step": 1
       }
     ],
-    "source": "framedeck",
+    "source": "edith",
     "detail": "Choose for several elements floating in depth, such as labels, tokens, icons, or conceptual building blocks.",
     "defaultBox": "center",
     "supportsEffects": false
@@ -1997,7 +1997,7 @@ export const legacyMotionDesignTemplates = [
         "step": 1
       }
     ],
-    "source": "framedeck",
+    "source": "edith",
     "detail": "Choose for rotating through cards, options, testimonials, features, products, or examples in a compact 3D layout.",
     "defaultBox": "center",
     "supportsEffects": false
@@ -2055,7 +2055,7 @@ export const legacyMotionDesignTemplates = [
         "step": 1
       }
     ],
-    "source": "framedeck",
+    "source": "edith",
     "detail": "Choose for directional navigation, multiple sections, app screens, chapters, or cube-like scene changes.",
     "defaultBox": "center",
     "supportsEffects": false
@@ -2102,7 +2102,7 @@ export const legacyMotionDesignTemplates = [
         "step": 1
       }
     ],
-    "source": "framedeck",
+    "source": "edith",
     "detail": "Choose for product demos, UI walkthroughs, focus highlights, and moments where a cursor should guide attention.",
     "defaultBox": "center",
     "supportsEffects": false
@@ -2149,7 +2149,7 @@ export const legacyMotionDesignTemplates = [
         "step": 1
       }
     ],
-    "source": "framedeck",
+    "source": "edith",
     "detail": "Choose for slow photo-like push, calm emphasis, documentary pacing, or giving static content camera movement.",
     "defaultBox": "center",
     "supportsEffects": false
@@ -2206,7 +2206,7 @@ export const legacyMotionDesignTemplates = [
         "step": 1
       }
     ],
-    "source": "framedeck",
+    "source": "edith",
     "detail": "Choose for explaining a step-by-step process where timing and progression matter visually.",
     "defaultBox": "center",
     "supportsEffects": false
@@ -2264,7 +2264,7 @@ export const legacyMotionDesignTemplates = [
         "step": 0.25
       }
     ],
-    "source": "framedeck",
+    "source": "edith",
     "detail": "Choose for layered terminal windows, developer demos, infra topics, logs, or technical command sequences with depth.",
     "defaultBox": "center",
     "supportsEffects": false
@@ -2311,7 +2311,7 @@ export const legacyMotionDesignTemplates = [
         "step": 1
       }
     ],
-    "source": "framedeck",
+    "source": "edith",
     "detail": "Choose for showcasing 3D transforms, spatial movement, technical motion design, or matrix-like rotations.",
     "defaultBox": "center",
     "supportsEffects": false
@@ -2361,7 +2361,7 @@ export const legacyMotionDesignTemplates = [
         "type": "color"
       }
     ],
-    "source": "framedeck",
+    "source": "edith",
     "detail": "Choose for a compact montage that showcases multiple motion primitives, intros, outros, or meta motion-design demos.",
     "defaultBox": "center",
     "supportsEffects": false

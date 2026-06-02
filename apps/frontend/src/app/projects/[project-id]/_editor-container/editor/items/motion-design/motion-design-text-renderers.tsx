@@ -211,7 +211,7 @@ export const CodeMotion: React.FC<MotionDesignRenderProps> = ({ item, frame, dur
       }}
     >
       <pre className="m-0 leading-relaxed whitespace-pre-wrap">
-        <span style={{ color: item.props.accentColor }}>// Framedeck</span>
+        <span style={{ color: item.props.accentColor }}>// Edith</span>
         {'\n'}
         {shown}
       </pre>

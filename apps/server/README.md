@@ -1,6 +1,6 @@
-# Framedeck Server
+# Edith Server
 
-NestJS 11 backend for Framedeck. It exposes the typed API, streams realtime editor events, orchestrates AI tools, manages S3 uploads, starts transcription/video analysis jobs, and triggers Remotion renders.
+NestJS 11 backend for Edith. It exposes the typed API, streams realtime editor events, orchestrates AI tools, manages S3 uploads, starts transcription/video analysis jobs, and triggers Remotion renders.
 
 ![NestJS](https://img.shields.io/badge/NestJS-11-e0234e?style=flat-square&logo=nestjs)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue?style=flat-square&logo=typescript&logoColor=white)
@@ -32,7 +32,7 @@ pnpm --filter server dev
 With portless enabled, the server is available at:
 
 ```text
-http://api-ai-video-editor.localhost:1355
+http://api-edith.localhost:1355
 ```
 
 To run without portless:

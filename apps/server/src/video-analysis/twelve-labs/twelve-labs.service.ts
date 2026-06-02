@@ -119,7 +119,7 @@ export class TwelveLabsService {
     return (
       this.configService.get<string>('TWELVELABS_INDEX_NAME') ??
       this.configService.get<string>('12LABS_INDEX_NAME') ??
-      'ai-video-editor'
+      'edith'
     );
   }
 

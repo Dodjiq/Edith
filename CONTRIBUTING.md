@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for wanting to improve Framedeck.
+Thanks for wanting to improve Edith.
 
 ## Development
 

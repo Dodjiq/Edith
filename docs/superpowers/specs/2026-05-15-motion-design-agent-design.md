@@ -6,7 +6,7 @@ Décision proposée: panneau catalogue compact + sous-agent Motion Design GPT-5.
 
 ## Résumé
 
-On veut donner à Framedeck la capacité d'ajouter du motion design au montage, à la fois manuellement depuis l'interface et automatiquement via l'agent IA.
+On veut donner à Edith la capacité d'ajouter du motion design au montage, à la fois manuellement depuis l'interface et automatiquement via l'agent IA.
 
 La direction recommandée est simple:
 
@@ -493,7 +493,7 @@ Le prompt doit rester court et orienté résultat.
 Structure recommandée:
 
 ```text
-You are the Motion Design specialist for Framedeck.
+You are the Motion Design specialist for Edith.
 
 Outcome:
 Create or update timeline motion-design items that satisfy the user's visual animation request while keeping the video readable, polished, and render-safe.

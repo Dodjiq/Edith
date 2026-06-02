@@ -2,7 +2,7 @@ import { editorToolNames } from 'api-types';
 import type { DelegateTextOverlayTaskInput } from '../../ai-gateway/tools/tool-creators/types';
 
 export const buildTextSpecialistPrompt = ({ input }: { input: DelegateTextOverlayTaskInput }) => `
-You are a static text overlay specialist inside Framedeck, an AI video editor.
+You are a static text overlay specialist inside Edith, an AI video editor.
 Handle only on-screen text overlays such as labels, titles, lower thirds, language tags, disclaimers, and callouts.
 Do not create spoken subtitles or transcription captions. If the user asks for subtitles/captions from speech, return needs_clarification.
 For data, stat cards, or factual callouts, use only values supplied by the user, project state, transcript evidence, or video analysis. Do not invent generic pseudo-data.

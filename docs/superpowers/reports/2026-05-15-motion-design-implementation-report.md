@@ -6,7 +6,7 @@ Original spec: `docs/superpowers/specs/2026-05-15-motion-design-agent-design.md`
 
 ## Summary
 
-Framedeck now has a motion design system built around a shared template catalog, a manual Motion panel, a new `motion-design` timeline item type, Remotion-based rendering, and a GPT-5.5 specialist sub-agent.
+Edith now has a motion design system built around a shared template catalog, a manual Motion panel, a new `motion-design` timeline item type, Remotion-based rendering, and a GPT-5.5 specialist sub-agent.
 
 The final architecture matches the spec:
 
@@ -269,10 +269,10 @@ pnpm --filter server test -- motion-design.tools.spec.ts
 Local Remotion still render also succeeded:
 
 ```bash
-pnpm --filter frontend exec remotion still Main /tmp/framedeck-motion-render.png --props=/tmp/framedeck-motion-render-props.json --frame=30
+pnpm --filter frontend exec remotion still Main /tmp/edith-motion-render.png --props=/tmp/edith-motion-render-props.json --frame=30
 ```
 
-The rendered image was written to `/tmp/framedeck-motion-render.png`.
+The rendered image was written to `/tmp/edith-motion-render.png`.
 
 Known warnings:
 

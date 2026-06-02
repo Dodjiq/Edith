@@ -1,10 +1,10 @@
 <p align="center">
-  <img src="./public/icon.png" alt="Framedeck icon" width="88" />
+  <img src="./public/icon.png" alt="Edith icon" width="88" />
 </p>
 
-# Framedeck Frontend
+# Edith Frontend
 
-Next.js 16 app for the Framedeck editor: timeline editing, asset uploads, AI chat controls, realtime task progress, Remotion previews, and render orchestration.
+Next.js 16 app for the Edith editor: timeline editing, asset uploads, AI chat controls, realtime task progress, Remotion previews, and render orchestration.
 
 ![Next.js](https://img.shields.io/badge/Next.js-16-black?style=flat-square&logo=nextdotjs)
 ![React](https://img.shields.io/badge/React-19-149eca?style=flat-square&logo=react&logoColor=white)
@@ -33,7 +33,7 @@ pnpm --filter frontend dev
 With portless enabled, open:
 
 ```text
-http://ai-video-editor.localhost:1355
+http://edith.localhost:1355
 ```
 
 To run without portless:

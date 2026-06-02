@@ -249,7 +249,7 @@ export function createGetMotionDesignPresetDetailsTool(): Tool<
           'Use defaultProps as the safest starting point and patch only the values needed for the user request.',
           template.source === 'motion-studio'
             ? 'This is a Motion Studio scene. Prefer full-frame placement unless the user asks for a smaller overlay.'
-            : 'This is a legacy Framedeck preset. It uses the existing lightweight renderer.',
+            : 'This is a legacy Edith preset. It uses the existing lightweight renderer.',
           template.supportsEffects
             ? 'Effects are optional. Pass effects as an array with id, effectId, and props when the user asks for extra entrance, exit, range, or loop motion.'
             : 'This preset does not support Motion Studio effect wrappers.',

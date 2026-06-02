@@ -1,5 +1,5 @@
-const portlessFrontendHost = 'ai-video-editor.localhost';
-const portlessBackendHost = 'api-ai-video-editor.localhost';
+const portlessFrontendHost = 'edith.localhost';
+const portlessBackendHost = 'api-edith.localhost';
 const defaultBackendUrl = 'http://localhost:4000';
 const defaultPortlessPort = '1355';
 

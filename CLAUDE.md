@@ -1,12 +1,12 @@
-# Framedeck - Agent Guide
+# Edith - Agent Guide
 
-Framedeck is an AI-powered video editor. Users edit videos with natural language prompts to remove silences, add b-roll, generate subtitles, create motion designs, analyze footage, prepare voiceovers, and render finished videos.
+Edith is an AI-powered video editor. Users edit videos with natural language prompts to remove silences, add b-roll, generate subtitles, create motion designs, analyze footage, prepare voiceovers, and render finished videos.
 
 This file is the root guide for coding agents. Keep changes small, preserve the existing architecture, and prefer local project patterns over new abstractions.
 
 ## Project Overview
 
-Framedeck is a PNPM/Turborepo monorepo with a shared `ts-rest` contract.
+Edith is a PNPM/Turborepo monorepo with a shared `ts-rest` contract.
 
 ```text
 apps/
@@ -89,9 +89,9 @@ pnpm --filter media-processor test
 
 Portless dev URLs:
 
-- Frontend: `http://ai-video-editor.localhost:1355`
-- Backend: `http://api-ai-video-editor.localhost:1355`
-- Media processor: `http://media-ai-video-editor.localhost:1355`
+- Frontend: `http://edith.localhost:1355`
+- Backend: `http://api-edith.localhost:1355`
+- Media processor: `http://media-edith.localhost:1355`
 
 Use `pnpm portless:list` to inspect active routes.
 

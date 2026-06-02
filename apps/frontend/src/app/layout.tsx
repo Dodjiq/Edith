@@ -32,9 +32,9 @@ const poppins = localFont({
 });
 
 export const metadata: Metadata = {
-  title: 'Framedeck',
+  title: 'Edith',
   description:
-    'Framedeck is a video editor powered by AI. It allows you to edit videos with ease and create professional videos in no time.',
+    'Edith is a video editor powered by AI. It allows you to edit videos with ease and create professional videos in no time.',
   icons: {
     icon: '/icon.svg',
   },

@@ -1,4 +1,4 @@
-/* Auto-generated from the existing Framedeck registry and Motion Studio source metadata. */
+/* Auto-generated from the existing Edith registry and Motion Studio source metadata. */
 import type { MotionDesignEffectDefinition, MotionDesignTemplate } from './types';
 
 export const motionStudioMotionDesignTemplates = [

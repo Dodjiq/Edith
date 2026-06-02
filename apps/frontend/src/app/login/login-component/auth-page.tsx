@@ -34,7 +34,7 @@ export function AuthPage() {
           <div className="-translate-y-87.5 h-320 absolute right-0 top-0 w-60 rounded-full bg-[radial-gradient(50%_50%_at_50%_50%,--theme(--color-foreground/.04)_0,--theme(--color-foreground/.01)_80%,transparent_100%)]" />
         </div>
         <Button asChild className="absolute left-5 top-7" variant="ghost">
-          <a href="https://framedeck.ai">
+          <a href="https://edith.ai">
             <ChevronLeftIcon />
             Landing page
           </a>

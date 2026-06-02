@@ -56,10 +56,10 @@ export const EditorSidebar: React.FC = () => {
         <Tooltip>
           <TooltipTrigger asChild>
             <Link href="/" className="flex size-8 items-center justify-center rounded-md text-white hover:bg-white/10">
-              <NextImage src="/icon.svg" alt="Framedeck" width={18} height={18} className="size-8" />
+              <NextImage src="/icon.svg" alt="Edith" width={18} height={18} className="size-8" />
             </Link>
           </TooltipTrigger>
-          <TooltipPanel side="right">Framedeck</TooltipPanel>
+          <TooltipPanel side="right">Edith</TooltipPanel>
         </Tooltip>
       </div>
 

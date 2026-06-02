@@ -11,7 +11,7 @@ const Home: React.FC = () => {
     <main className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
       <div className="mx-auto max-w-5xl px-6 py-16">
         <header className="mb-16 flex flex-col items-center gap-4 text-center">
-          <h1 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-white">Framedeck</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-white">Edith</h1>
           <p className="max-w-md text-zinc-500 dark:text-zinc-400">
             Edit videos with natural language. Remove silences, add subtitles, and more.
           </p>

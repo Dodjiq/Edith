@@ -8,7 +8,7 @@ import { AwsService } from '../aws/aws.service';
 
 const PRESIGNED_URL_EXPIRY_SECONDS = 3600;
 const COMP_NAME = 'Main';
-const SITE_NAME = 'remotion-framedeck';
+const SITE_NAME = 'remotion-edith';
 const TIMEOUT_IN_SECONDS = 240;
 const MEM_SIZE_IN_MB = 3008;
 const DISK_SIZE_IN_MB = 10240;

@@ -56,7 +56,7 @@ const MotionTemplateCardComponent: React.FC<MotionTemplateCardProps> = ({ templa
       </div>
       <p className="mt-1 line-clamp-2 text-[11px] leading-4 text-neutral-500">{template.description}</p>
       <span className="mt-2 inline-flex rounded bg-white/5 px-1.5 py-0.5 text-[10px] text-neutral-400">
-        {categoryLabels[template.category]} · {template.source === 'motion-studio' ? 'Motion Studio' : 'Framedeck'}
+        {categoryLabels[template.category]} · {template.source === 'motion-studio' ? 'Motion Studio' : 'Edith'}
       </span>
     </div>
   </button>

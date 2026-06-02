@@ -1,6 +1,6 @@
-# Framedeck Media Processor
+# Edith Media Processor
 
-Internal Rust/Axum service for the Framedeck media pipeline. It extracts MP3 audio from uploaded video files with FFmpeg so the Nest server can send lighter audio payloads to ElevenLabs Scribe v2.
+Internal Rust/Axum service for the Edith media pipeline. It extracts MP3 audio from uploaded video files with FFmpeg so the Nest server can send lighter audio payloads to ElevenLabs Scribe v2.
 
 ![Rust](https://img.shields.io/badge/Rust-2021-b7410e?style=flat-square&logo=rust)
 ![Axum](https://img.shields.io/badge/Axum-0.7-222?style=flat-square)
@@ -59,7 +59,7 @@ pnpm --filter media-processor dev
 With portless enabled, open:
 
 ```text
-http://media-ai-video-editor.localhost:1355
+http://media-edith.localhost:1355
 ```
 
 Without portless:

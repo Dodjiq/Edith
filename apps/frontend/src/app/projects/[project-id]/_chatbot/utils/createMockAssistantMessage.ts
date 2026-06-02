@@ -14,7 +14,7 @@ type MockAssistantArgs = {
 
 const SAMPLE_SOURCES = [
   'https://research.voicecheap.ai/editor-overview',
-  'https://voicecheap.ai/blog/ai-video-editor',
+  'https://voicecheap.ai/blog/edith',
   'https://docs.voicecheap.ai/product-updates',
 ];
 

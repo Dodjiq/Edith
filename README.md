@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="./apps/frontend/public/icon.png" alt="Framedeck icon" width="96" />
+  <img src="./apps/frontend/public/icon.png" alt="Edith icon" width="96" />
 </p>
 
-# Framedeck
+# Edith
 
 AI video editing software that turns natural language prompts into timeline edits: remove silences, add captions, analyze footage, prepare voiceovers, and render finished videos.
 
@@ -16,7 +16,7 @@ AI video editing software that turns natural language prompts into timeline edit
 
 ## Overview
 
-Framedeck is a Turborepo monorepo for an AI-assisted video editor. The frontend hosts the editor and video compositions, the Nest server owns the typed API and AI tool orchestration, and the Rust media processor handles fast FFmpeg audio extraction for transcription.
+Edith is a Turborepo monorepo for an AI-assisted video editor. The frontend hosts the editor and video compositions, the Nest server owns the typed API and AI tool orchestration, and the Rust media processor handles fast FFmpeg audio extraction for transcription.
 
 The shared API contract lives in `packages/api-types` and is the source of truth for both frontend hooks and server handlers through `ts-rest`.
 
@@ -24,9 +24,9 @@ The shared API contract lives in `packages/api-types` and is the source of truth
 
 | App                                              | Purpose                                                                               | Local URL                                     |
 | ------------------------------------------------ | ------------------------------------------------------------------------------------- | --------------------------------------------- |
-| [`apps/frontend`](./apps/frontend)               | Next.js editor UI, chat assistant, uploads, preview, and render client                | `http://ai-video-editor.localhost:1355`       |
-| [`apps/server`](./apps/server)                   | Nest API, WebSocket gateway, AI Gateway tools, uploads, transcription, video analysis | `http://api-ai-video-editor.localhost:1355`   |
-| [`apps/media-processor`](./apps/media-processor) | Rust/Axum internal service for FFmpeg audio extraction from video files               | `http://media-ai-video-editor.localhost:1355` |
+| [`apps/frontend`](./apps/frontend)               | Next.js editor UI, chat assistant, uploads, preview, and render client                | `http://edith.localhost:1355`       |
+| [`apps/server`](./apps/server)                   | Nest API, WebSocket gateway, AI Gateway tools, uploads, transcription, video analysis | `http://api-edith.localhost:1355`   |
+| [`apps/media-processor`](./apps/media-processor) | Rust/Axum internal service for FFmpeg audio extraction from video files               | `http://media-edith.localhost:1355` |
 | [`packages/api-types`](./packages/api-types)     | Shared `ts-rest` contracts, Zod schemas, realtime constants, chat types               | n/a                                           |
 
 ## How it works
@@ -88,9 +88,9 @@ pnpm dev
 
 With portless enabled, the public dev URLs are stable:
 
-- Frontend: `http://ai-video-editor.localhost:1355`
-- Backend: `http://api-ai-video-editor.localhost:1355`
-- Media processor: `http://media-ai-video-editor.localhost:1355`
+- Frontend: `http://edith.localhost:1355`
+- Backend: `http://api-edith.localhost:1355`
+- Media processor: `http://media-edith.localhost:1355`
 
 To use direct app ports from local env files instead:
 

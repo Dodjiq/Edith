@@ -255,19 +255,19 @@ const DebugDrawerContent: React.FC = () => {
               <DebugDownloadButton
                 label="State"
                 tooltip="Download project state JSON"
-                fileNamePrefix="framedeck-debug-state"
+                fileNamePrefix="edith-debug-state"
                 getData={() => ({ exportedAt: new Date().toISOString(), projectState: projectStateExportData })}
               />
               <DebugDownloadButton
                 label="Conversation"
                 tooltip="Download conversation JSON with tool calls"
-                fileNamePrefix="framedeck-debug-conversation"
+                fileNamePrefix="edith-debug-conversation"
                 getData={() => ({ exportedAt: new Date().toISOString(), conversation: conversationExportData })}
               />
               <DebugDownloadButton
                 label="Both"
                 tooltip="Download project state and conversation in one JSON file"
-                fileNamePrefix="framedeck-debug-snapshot"
+                fileNamePrefix="edith-debug-snapshot"
                 getData={() => ({
                   exportedAt: new Date().toISOString(),
                   projectState: projectStateExportData,

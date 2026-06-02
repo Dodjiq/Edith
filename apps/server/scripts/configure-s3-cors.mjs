@@ -53,12 +53,12 @@ const s3Client = new S3Client({
 });
 
 const uploadCorsRule = {
-  ID: 'FramedeckBrowserUploads',
+  ID: 'EdithBrowserUploads',
   AllowedHeaders: ['*'],
   AllowedMethods: ['GET', 'HEAD', 'PUT', 'POST'],
   AllowedOrigins: [
-    'https://ai-video-editor.localhost',
-    'https://ai-video-editor.localhost:*',
+    'https://edith.localhost',
+    'https://edith.localhost:*',
     'http://localhost:*',
     'http://127.0.0.1:*',
   ],

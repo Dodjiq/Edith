@@ -7,4 +7,4 @@ if [ "${PORTLESS:-1}" = "0" ]; then
   exec node scripts/dev.mjs
 fi
 
-exec bash ../../scripts/run-with-portless.sh media-ai-video-editor node scripts/dev.mjs
+exec bash ../../scripts/run-with-portless.sh media-edith node scripts/dev.mjs

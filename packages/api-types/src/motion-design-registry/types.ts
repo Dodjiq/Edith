@@ -18,7 +18,7 @@ export type MotionDesignCategory = (typeof motionDesignCategories)[number];
 
 export type MotionDesignDirection = 'left' | 'right' | 'up' | 'down';
 
-export type MotionDesignSource = 'framedeck' | 'motion-studio';
+export type MotionDesignSource = 'edith' | 'motion-studio';
 
 export type MotionDesignPropValue =
   | string
