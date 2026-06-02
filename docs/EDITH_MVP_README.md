@@ -1,18 +1,19 @@
-# Edith MVP — Installation et état actuel
+# Edith MVP - Installation et etat actuel
 
 ## Objectif
 
-Edith transforme des rushs produit en variantes publicitaires prêtes à tester: TikTok Ads, Reels Ads, Facebook Ads et Shorts.
+Edith transforme des rushs produit en variantes publicitaires pretes a tester: TikTok Ads, Reels Ads, Facebook Ads et Shorts.
 
-Ce MVP prépare le parcours produit sans réutiliser la timeline complète comme coeur du produit.
+Le MVP garde l'ancien editeur Framedeck isole et recentre le premier parcours sur: compte, projet, upload video, preset, generation, statut, exports.
 
-## Commandes
+## Commandes locales
 
 Depuis la racine:
 
 ```bash
 pnpm install
-pnpm typecheck
+pnpm --filter frontend exec tsc --noEmit
+pnpm --filter frontend build
 pnpm --filter frontend dev
 ```
 
@@ -22,94 +23,146 @@ Pour Cloudflare Pages:
 pnpm pages:build
 ```
 
-Configuration Cloudflare recommandée:
+Note Windows: `@cloudflare/next-on-pages` peut echouer localement avec `spawn bash ENOENT`. Le build Next frontend passe; lance le build Cloudflare sur Cloudflare/Linux ou via WSL.
+
+## Configuration Cloudflare
+
+Dans les champs Build:
 
 ```txt
-Build command: pnpm pages:build
-Build output directory: apps/frontend/.vercel/output/static
-Root directory: /
+Commande de build: pnpm pages:build
+Repertoire de sortie de version: apps/frontend/.vercel/output/static
+Chemin d'acces / repertoire racine: /
 ```
 
-## Variables à configurer
+Si tu es dans l'interface Workers avec une commande de deploiement:
 
-Voir `.env.example`.
-
-Minimum pour le mode mock:
-
-```env
-ENABLE_MOCK_RENDER=true
-ENABLE_REAL_MODAL=false
-BILLING_DISABLED=true
+```txt
+Deploy command: npx wrangler pages deploy apps/frontend/.vercel/output/static --project-name=edith
+Branch deploy command: npx wrangler pages deploy apps/frontend/.vercel/output/static --project-name=edith --branch=$CF_PAGES_BRANCH
 ```
 
-À brancher pour le mode réel:
+## Variables Cloudflare minimales
 
 ```env
-NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
+NEXT_PUBLIC_APP_URL=https://ton-domaine
+NEXT_PUBLIC_SUPABASE_URL=https://ffhgfgdrudkqspgtbcdj.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 SUPABASE_STORAGE_BUCKET=videos
-MODAL_TOKEN_ID=
-MODAL_TOKEN_SECRET=
-MODAL_APP_NAME=edith-render-worker
+BILLING_DISABLED=true
+ENABLE_MOCK_RENDER=true
+ENABLE_REAL_MODAL=false
+```
+
+Pour Modal reel:
+
+```env
+ENABLE_REAL_MODAL=true
+MODAL_RENDER_ENDPOINT_URL=
+MODAL_WEBHOOK_SECRET=
+ENABLE_REAL_TRANSCRIPTION=false
+WHISPER_MODEL_SIZE=base
+```
+
+Pour Stripe reel:
+
+```env
 STRIPE_SECRET_KEY=
 STRIPE_WEBHOOK_SECRET=
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
+STRIPE_STARTER_PRICE_ID=
+STRIPE_PRO_PRICE_ID=
+STRIPE_SCALE_PRICE_ID=
+BILLING_DISABLED=false
 ```
+
+## Supabase
+
+Schema applique sur le projet `ffhgfgdrudkqspgtbcdj`.
+
+Tables principales:
+
+- `projects`
+- `project_assets`
+- `transcriptions`
+- `video_variants`
+- `render_jobs`
+- `user_credits`
+- `credit_transactions`
+- `stripe_customers`
+- `stripe_subscriptions`
+
+Storage:
+
+- Bucket prive: `videos`
+- Chemin attendu: `{user_id}/...`
+- Les exports Modal sont ecrits dans `{user_id}/{project_id}/exports/{variant_id}.mp4`
+
+## Modal reel
+
+Fichiers:
+
+- `modal/render_worker.py`
+- `modal/requirements.txt`
+- `modal/README.md`
+
+Deploiement:
+
+```bash
+modal secret create edith-render-secrets SUPABASE_URL=https://ffhgfgdrudkqspgtbcdj.supabase.co SUPABASE_SERVICE_ROLE_KEY=... SUPABASE_STORAGE_BUCKET=videos MODAL_WEBHOOK_SECRET=...
+modal deploy modal/render_worker.py
+```
+
+Apres deploy, copie l'URL HTTP de `submit_render_project` dans `MODAL_RENDER_ENDPOINT_URL`.
+
+Le worker telecharge la video depuis Supabase Storage, extrait l'audio avec FFmpeg, peut transcrire avec faster-whisper, genere les variantes MP4 avec overlay hook, upload les exports, puis met a jour Supabase.
 
 ## Pages MVP
 
 - `/`: landing Edith e-commerce.
-- `/auth/login`: connexion mock prête Supabase Auth.
-- `/auth/register`: inscription mock prête Supabase Auth.
-- `/dashboard`: dashboard MVP.
-- `/projects/new`: formulaire génération variantes.
-- `/projects/[id]`: statut et variantes mockées.
-- `/pricing`: plans et crédits.
+- `/auth/login`: connexion Supabase Auth.
+- `/auth/register`: inscription Supabase Auth.
+- `/dashboard`: vue projets, credits, pipeline.
+- `/projects/new`: creation projet, upload direct Supabase Storage, options de rendu.
+- `/projects/[id]`: statut, jobs, variantes, telechargement.
+- `/pricing`: plans et credits.
+- `/settings`: parametres SaaS et etat integrations.
 - `/settings/billing`: portail billing placeholder.
 
 ## API MVP
 
-- `POST /api/render/start`: valide les inputs, crée un projet mock, génère un edit plan mock et des variants.
-- `GET /api/render/status?projectId=...`: retourne statut et variants mockés.
+- `POST /api/render/start`: verifie la session, cree projet/assets/jobs/variants, reserve les credits si billing actif, declenche Modal ou le mock DB.
+- `GET /api/render/status?projectId=...`: retourne projet, jobs et variants de l'utilisateur connecte.
+- `GET /api/render/download?path=...`: cree une URL signee Storage pour un export appartenant a l'utilisateur.
 - `POST /api/stripe/checkout`: placeholder non bloquant.
 - `POST /api/stripe/webhook`: placeholder non bloquant.
 - `POST /api/stripe/portal`: placeholder non bloquant.
 
-## Ce qui est mocké
+## Ce qui fonctionne
 
-- Auth utilisateur.
-- Création projet persistante.
-- Upload vidéo Supabase Storage.
-- Vérification crédits.
-- Déclenchement Modal réel.
-- Rendu FFmpeg réel.
-- Exports vidéo réels.
-- Stripe checkout, webhook et portail client.
+- Landing page Edith.
+- Auth Supabase email/password.
+- Dashboard connecte a Supabase.
+- Creation projet en base.
+- Upload direct vers Supabase Storage.
+- Creation des assets, render jobs et variants.
+- Polling statut projet.
+- Worker Modal reel deployable.
+- Mode mock DB pour tester sans Modal.
 
-## Ce qui est préparé
+## Ce qui reste mocke ou a brancher
 
-- Schéma Supabase avec RLS dans `supabase/schema.sql`.
-- Version déclarative dans `supabase/schemas/001_edith_mvp.sql`.
-- Générateur de plan de montage dans `apps/frontend/src/lib/edit-plan/generate-edit-plan.ts`.
-- Client Modal abstrait dans `apps/frontend/src/lib/modal/client.ts`.
-- Worker Modal dans `modal/render_worker.py`.
-
-## À brancher réellement
-
-1. Installer/configurer Supabase Auth côté Next.
-2. Remplacer le mock store par Supabase Postgres.
-3. Ajouter upload direct Supabase Storage.
-4. Connecter `/api/render/start` à Modal.
-5. Implémenter téléchargement Storage, faster-whisper et FFmpeg dans Modal.
-6. Uploader les exports vers Supabase Storage.
-7. Brancher Stripe et crédits.
-8. Remplacer polling mock par polling Supabase ou Realtime.
+- Paiement Stripe complet.
+- Attribution automatique de credits mensuels.
+- Consommation/remboursement final des credits apres completion/echec.
+- Plan de montage LLM reel.
+- Sous-titres ASS/SRT complets dans FFmpeg.
+- Transcription faster-whisper active seulement si `ENABLE_REAL_TRANSCRIPTION=true`.
 
 ## Risques restants
 
-- Pas de `LICENSE` détecté: clarifier avant usage commercial.
-- Le mode mock n'est pas persistant.
-- Le worker Modal est préparé mais pas encore relié à Supabase.
-- Le frontend contient encore l'ancien éditeur isolé.
-- Cloudflare ne doit jamais exécuter FFmpeg ou tâches longues.
+- Pas de `LICENSE` detecte: clarifier avant usage commercial.
+- Ancien editeur Framedeck encore present et a isoler/supprimer progressivement.
+- `SUPABASE_SERVICE_ROLE_KEY` doit rester uniquement dans Cloudflare env server-side, jamais en `NEXT_PUBLIC`.
+- Cloudflare ne doit jamais executer FFmpeg; le rendu reste dans Modal.

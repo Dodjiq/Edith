@@ -20,7 +20,40 @@ export type RenderJobStatus = {
 
 export const startRenderJob = async (input: StartRenderJobInput): Promise<{ jobId: string }> => {
   if (process.env.ENABLE_REAL_MODAL === 'true') {
-    throw new Error('Real Modal integration is not implemented yet. Use ENABLE_MOCK_RENDER=true for the MVP.');
+    const endpointUrl = process.env.MODAL_RENDER_ENDPOINT_URL;
+    const webhookSecret = process.env.MODAL_WEBHOOK_SECRET;
+
+    if (!endpointUrl || !webhookSecret) {
+      throw new Error('MODAL_RENDER_ENDPOINT_URL and MODAL_WEBHOOK_SECRET are required when ENABLE_REAL_MODAL=true.');
+    }
+
+    const response = await fetch(endpointUrl, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${webhookSecret}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        project_id: input.projectId,
+        user_id: input.userId,
+        asset_id: input.assetId,
+        storage_path: input.storagePath,
+        preset: input.preset,
+        format: input.format,
+        platform: input.platform,
+        instructions: input.instructions,
+        variants_count: input.variantsCount,
+        language: input.language,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Modal render endpoint failed: ${response.status} ${errorText}`);
+    }
+
+    const payload = (await response.json()) as { job_id?: string; call_id?: string };
+    return { jobId: payload.job_id ?? payload.call_id ?? `modal-${input.projectId}` };
   }
 
   generateMockEditPlan({
