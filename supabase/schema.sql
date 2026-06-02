@@ -220,19 +220,51 @@ create policy "Users can update own render jobs." on public.render_jobs for upda
 create policy "Users can delete own render jobs." on public.render_jobs for delete to authenticated using ((select auth.uid()) = user_id);
 
 create policy "Users can select own credits." on public.user_credits for select to authenticated using ((select auth.uid()) = user_id);
-create policy "Users can insert own credits." on public.user_credits for insert to authenticated with check ((select auth.uid()) = user_id);
-create policy "Users can update own credits." on public.user_credits for update to authenticated using ((select auth.uid()) = user_id) with check ((select auth.uid()) = user_id);
-create policy "Users can delete own credits." on public.user_credits for delete to authenticated using ((select auth.uid()) = user_id);
 
 create policy "Users can select own credit transactions." on public.credit_transactions for select to authenticated using ((select auth.uid()) = user_id);
-create policy "Users can insert own credit transactions." on public.credit_transactions for insert to authenticated with check ((select auth.uid()) = user_id);
 
 create policy "Users can select own stripe customers." on public.stripe_customers for select to authenticated using ((select auth.uid()) = user_id);
-create policy "Users can insert own stripe customers." on public.stripe_customers for insert to authenticated with check ((select auth.uid()) = user_id);
-create policy "Users can update own stripe customers." on public.stripe_customers for update to authenticated using ((select auth.uid()) = user_id) with check ((select auth.uid()) = user_id);
-create policy "Users can delete own stripe customers." on public.stripe_customers for delete to authenticated using ((select auth.uid()) = user_id);
 
 create policy "Users can select own stripe subscriptions." on public.stripe_subscriptions for select to authenticated using ((select auth.uid()) = user_id);
-create policy "Users can insert own stripe subscriptions." on public.stripe_subscriptions for insert to authenticated with check ((select auth.uid()) = user_id);
-create policy "Users can update own stripe subscriptions." on public.stripe_subscriptions for update to authenticated using ((select auth.uid()) = user_id) with check ((select auth.uid()) = user_id);
-create policy "Users can delete own stripe subscriptions." on public.stripe_subscriptions for delete to authenticated using ((select auth.uid()) = user_id);
+
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values (
+  'videos',
+  'videos',
+  false,
+  2147483648,
+  array['video/mp4', 'video/quicktime', 'video/webm', 'video/x-matroska', 'video/x-msvideo']
+)
+on conflict (id) do update
+set
+  public = excluded.public,
+  file_size_limit = excluded.file_size_limit,
+  allowed_mime_types = excluded.allowed_mime_types;
+
+create policy "Users can select own video objects." on storage.objects for select to authenticated
+using (
+  bucket_id = 'videos'
+  and (storage.foldername(name))[1] = (select auth.uid())::text
+);
+
+create policy "Users can insert own video objects." on storage.objects for insert to authenticated
+with check (
+  bucket_id = 'videos'
+  and (storage.foldername(name))[1] = (select auth.uid())::text
+);
+
+create policy "Users can update own video objects." on storage.objects for update to authenticated
+using (
+  bucket_id = 'videos'
+  and (storage.foldername(name))[1] = (select auth.uid())::text
+)
+with check (
+  bucket_id = 'videos'
+  and (storage.foldername(name))[1] = (select auth.uid())::text
+);
+
+create policy "Users can delete own video objects." on storage.objects for delete to authenticated
+using (
+  bucket_id = 'videos'
+  and (storage.foldername(name))[1] = (select auth.uid())::text
+);
