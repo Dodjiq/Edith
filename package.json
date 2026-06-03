@@ -9,9 +9,11 @@
     "build": "turbo run build",
     "dev": "turbo run dev",
     "dev:direct": "PORTLESS=0 turbo run dev",
+    "_comment_pages_build": "Legacy Cloudflare Pages build script, deployment moved to Vercel. Kept for reference.",
     "pages:build": "pnpm --filter api-types build && cd apps/frontend && npx @cloudflare/next-on-pages@1",
     "portless:list": "portless list",
     "portless:proxy": "portless proxy start",
+    "stripe:setup": "tsx scripts/stripe/create-products.ts",
     "test": "pnpm --filter server exec jest --runInBand && pnpm --filter media-processor test",
     "typecheck": "pnpm --filter api-types build && pnpm --filter frontend exec tsc && pnpm --filter server exec tsc"
   },
@@ -35,6 +37,8 @@
     "portless": "^0.13.0",
     "prettier": "^3.8.3",
     "prettier-plugin-tailwindcss": "^0.8.0",
+    "stripe": "^18.5.0",
+    "tsx": "^4.20.3",
     "turbo": "^2.9.14"
   }
 }

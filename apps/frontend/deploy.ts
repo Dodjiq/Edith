@@ -7,7 +7,7 @@ import {
   MEM_SIZE_IN_MB,
   SITE_NAME,
   TIMEOUT_IN_SECONDS,
-} from './src/app/projects/[project-id]/_editor-container/remotion/constants';
+} from './src/app/[locale]/projects/[project-id]/_editor-container/remotion/constants';
 
 // Check for AWS credentials
 if (!process.env.REMOTION_AWS_ACCESS_KEY_ID) {
@@ -67,6 +67,7 @@ await deploySite({
     __dirname,
     'src',
     'app',
+    '[locale]',
     'projects',
     '[project-id]',
     '_editor-container',

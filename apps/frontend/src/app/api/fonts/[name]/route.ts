@@ -1,4 +1,4 @@
-import { GOOGLE_FONTS_DATABASE } from '@/app/projects/[project-id]/_editor-container/editor/data/google-fonts';
+import { GOOGLE_FONTS_DATABASE } from '@/app/[locale]/projects/[project-id]/_editor-container/editor/data/google-fonts';
 
 export const GET = async (_request: Request, { params }: { params: Promise<{ name: string }> }) => {
   const { name } = await params;

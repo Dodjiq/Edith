@@ -24,7 +24,7 @@ Point légal important: aucun fichier `LICENSE` n'a été détecté à la racine
 - Backend: NestJS 11, ts-rest, AI SDK 6, Socket.IO, AWS SDK S3, Remotion Lambda, ElevenLabs, TwelveLabs, Deepgram.
 - Media processor: Rust, Axum, FFmpeg.
 - Contrat partagé: `@ts-rest/core`, Zod, TypeScript 6.
-- Déploiement ajouté récemment: Cloudflare Pages avec `wrangler.toml` et script `pages:build`.
+- Déploiement: Vercel pour le frontend Next.js (`wrangler.toml` et `pages:build` restent en legacy).
 
 ## Fonctionnalités actuelles détectées
 
@@ -54,14 +54,14 @@ Point légal important: aucun fichier `LICENSE` n'a été détecté à la racine
 - Landing, pricing, dashboard et pages projet vers le vocabulaire e-commerce.
 - Upload vidéo vers Supabase Storage au lieu de S3.
 - Realtime: remplacer Socket.IO backend par Supabase Realtime ou polling simple.
-- Contrat API: remplacer ts-rest/Nest pour le MVP Cloudflare par routes Next légères.
+- Contrat API: remplacer ts-rest/Nest pour le MVP Vercel par routes Next légères.
 - Rendu: remplacer Remotion Lambda par Modal + Python + FFmpeg.
 - Transcription: remplacer ElevenLabs/Deepgram par faster-whisper sur Modal.
 - Statuts projet/assets/variants vers un modèle Supabase simple.
 
 ## Parties à remplacer
 
-- `apps/server` pour le MVP: NestJS ne correspond pas à l'objectif Cloudflare/API légère.
+- `apps/server` pour le MVP: NestJS ne correspond pas à l'objectif Vercel/API légère.
 - AWS S3/Remotion Lambda pour stockage/rendu.
 - ElevenLabs, TwelveLabs et Deepgram pour le MVP.
 - Media processor Rust pour extraction audio: Modal + FFmpeg Python doit prendre ce rôle.
@@ -77,9 +77,9 @@ Point légal important: aucun fichier `LICENSE` n'a été détecté à la racine
 
 ## Risques techniques
 
-- Cloudflare ne peut pas exécuter FFmpeg ni jobs longs: tout rendu doit partir vers Modal.
-- Monorepo actuel build aussi Rust/Nest si mauvais script Cloudflare: utiliser `pnpm pages:build`.
-- Next.js 16 + Cloudflare/OpenNext peut demander des adaptations runtime.
+- Vercel ne peut pas exécuter FFmpeg ni jobs longs: tout rendu doit partir vers Modal.
+- Monorepo actuel build aussi Rust/Nest si mauvais script: viser `pnpm --filter frontend build` pour Vercel.
+- Next.js 16 sur Vercel peut demander des adaptations runtime mineures.
 - Supabase Storage direct upload pour grosses vidéos doit être cadré: limites, resumable upload et validation MIME/durée.
 - Migration d'un éditeur riche vers un MVP simple peut laisser beaucoup de code mort temporaire.
 - Les variables env actuelles sont orientées AWS/ElevenLabs/TwelveLabs; il faut les remplacer progressivement.

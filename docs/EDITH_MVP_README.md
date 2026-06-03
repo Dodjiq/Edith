@@ -17,32 +17,27 @@ pnpm --filter frontend build
 pnpm --filter frontend dev
 ```
 
-Pour Cloudflare Pages:
+Pour Vercel:
 
 ```bash
-pnpm pages:build
+pnpm --filter frontend build
 ```
 
-Note Windows: `@cloudflare/next-on-pages` peut echouer localement avec `spawn bash ENOENT`. Le build Next frontend passe; lance le build Cloudflare sur Cloudflare/Linux ou via WSL.
+## Configuration Vercel
 
-## Configuration Cloudflare
-
-Dans les champs Build:
+Dans les champs Build du projet Vercel:
 
 ```txt
-Commande de build: pnpm pages:build
-Repertoire de sortie de version: apps/frontend/.vercel/output/static
-Chemin d'acces / repertoire racine: /
+Framework Preset: Next.js
+Root Directory: apps/frontend
+Build Command: pnpm --filter frontend build
+Install Command: pnpm install
+Output Directory: .next
 ```
 
-Si tu es dans l'interface Workers avec une commande de deploiement:
+Le déploiement se fait via `git push` ou le dashboard Vercel.
 
-```txt
-Deploy command: npx wrangler pages deploy apps/frontend/.vercel/output/static --project-name=edith
-Branch deploy command: npx wrangler pages deploy apps/frontend/.vercel/output/static --project-name=edith --branch=$CF_PAGES_BRANCH
-```
-
-## Variables Cloudflare minimales
+## Variables Vercel minimales
 
 ```env
 NEXT_PUBLIC_APP_URL=https://ton-domaine
@@ -164,5 +159,5 @@ Le worker telecharge la video depuis Supabase Storage, extrait l'audio avec FFmp
 
 - Pas de `LICENSE` detecte: clarifier avant usage commercial.
 - Ancien editeur Framedeck encore present et a isoler/supprimer progressivement.
-- `SUPABASE_SERVICE_ROLE_KEY` doit rester uniquement dans Cloudflare env server-side, jamais en `NEXT_PUBLIC`.
-- Cloudflare ne doit jamais executer FFmpeg; le rendu reste dans Modal.
+- `SUPABASE_SERVICE_ROLE_KEY` doit rester uniquement dans Vercel env server-side, jamais en `NEXT_PUBLIC`.
+- Vercel ne doit jamais executer FFmpeg; le rendu reste dans Modal.

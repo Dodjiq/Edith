@@ -1,0 +1,607 @@
+{
+  "nav": {
+    "product": "Product",
+    "workflow": "Workflow",
+    "pricing": "Pricing",
+    "contact": "Contact",
+    "login": "Sign in",
+    "try": "Try it"
+  },
+  "hero": {
+    "badge": "AI ad variant engine for e-commerce",
+    "title_part1": "Your product footage becomes ads ready to test",
+    "subtitle": "Edith helps e-commerce and dropshipping brands turn raw video into multiple short variants with hooks, captions, cuts, zooms and marketing angles.",
+    "cta_primary": "Create my first variant",
+    "cta_secondary": "See the pipeline",
+    "platforms": {
+      "tiktok": "TikTok Ads",
+      "reels": "Reels Ads",
+      "facebook": "Facebook Ads"
+    }
+  },
+  "capabilities": {
+    "section_label": "/ Capabilities",
+    "modules_suffix": "modules",
+    "items": {
+      "brief": {
+        "title": "Natural brief",
+        "detail": "Describe the product, tone, target or style. Edith turns the brief into an actionable edit plan."
+      },
+      "upload": {
+        "title": "Direct upload",
+        "detail": "Footage goes to Supabase Storage. Vercel stays light and never touches heavy rendering."
+      },
+      "captions": {
+        "title": "Ad captions",
+        "detail": "Short, readable subtitles placed to hold attention on mobile."
+      },
+      "cuts": {
+        "title": "Cuts and pacing",
+        "detail": "Fast structure, fewer silences, sharper hooks and simple transitions."
+      },
+      "formats": {
+        "title": "Social formats",
+        "detail": "9:16, 1:1 or 16:9 for TikTok Ads, Reels Ads, Shorts and Facebook Ads."
+      },
+      "angles": {
+        "title": "Marketing angles",
+        "detail": "Problem-solution, benefit, proof, product demo or customer objection."
+      },
+      "render": {
+        "title": "Modal rendering",
+        "detail": "FFmpeg and faster-whisper run inside Modal, not in the browser or on Vercel."
+      },
+      "exports": {
+        "title": "Exports ready",
+        "detail": "Every variant returns to the dashboard with status, preview and download."
+      }
+    }
+  },
+  "outcomes": {
+    "section_label": "/ Why Edith",
+    "title": "A creative testing machine, not a generic video editor.",
+    "items": {
+      "test_faster": {
+        "title": "To test faster",
+        "detail": "Turn a single rush into several creative hypotheses without opening a timeline."
+      },
+      "sell_clearer": {
+        "title": "To sell more clearly",
+        "detail": "Each variant highlights one angle: benefit, proof, objection or demo."
+      },
+      "stay_control": {
+        "title": "To stay in control",
+        "detail": "You keep the preset, format, language, variant count and the brief."
+      }
+    }
+  },
+  "demo": {
+    "section_label": "/ Walkthrough",
+    "title_part1": "Upload, brief, render.",
+    "title_part2": "Test faster.",
+    "cta": "Run a local test",
+    "preview_label": "Ecommerce ad / 9:16",
+    "preview_hook": "This little product solves a real problem"
+  },
+  "workflow": {
+    "section_label": "/ Workflow",
+    "title": "No complex timeline.",
+    "subtitle": "Edith keeps Vercel light: app, auth, projects and webhooks. Heavy rendering goes to Modal.",
+    "steps": {
+      "upload": "Upload",
+      "preset": "Preset",
+      "prompt": "Prompt",
+      "render": "Render",
+      "exports": "Exports"
+    }
+  },
+  "presets": {
+    "section_label": "/ MVP presets",
+    "title": "Three modes, enough to launch your first tests.",
+    "items": {
+      "ugc_dynamic": {
+        "title": "Dynamic UGC",
+        "detail": "Facecam, testimonial, fast pacing, strong hook and readable captions."
+      },
+      "ecommerce_ad": {
+        "title": "E-commerce ad",
+        "detail": "Product callouts, zooms, benefits, vertical format and simple outro."
+      },
+      "product_demo": {
+        "title": "Product demo",
+        "detail": "Clean steps, product focus, explanatory text and crisp cuts."
+      }
+    }
+  },
+  "architecture": {
+    "title": "An architecture built to scale.",
+    "detail": "Supabase handles auth, storage and data. Modal handles video rendering. Stripe can be plugged in without blocking the MVP. The service role stays server-side only.",
+    "stack": {
+      "supabase": "Supabase Auth + Storage",
+      "vercel": "Vercel + Next.js 16",
+      "modal": "Modal FFmpeg worker",
+      "stripe": "Stripe credits ready"
+    }
+  },
+  "faq": {
+    "section_label": "/ FAQ",
+    "title": "The right questions before you launch.",
+    "items": {
+      "capcut": {
+        "q": "Does Edith replace CapCut?",
+        "a": "No. Edith is not trying to become a full manual editor. The MVP focuses on generating ad variants ready to test."
+      },
+      "vercel_render": {
+        "q": "Does Vercel render the videos?",
+        "a": "No. Vercel serves the app and lightweight APIs. Heavy FFmpeg/transcription tasks go to Modal."
+      },
+      "ugc": {
+        "q": "Can I use my own UGC videos?",
+        "a": "Yes. Uploads support product footage, UGC, demos, testimonials, packshots or COD/dropshipping video."
+      },
+      "stripe": {
+        "q": "Is Stripe required?",
+        "a": "Not for testing. Billing can stay disabled, then credits and subscriptions will be connected gradually."
+      }
+    }
+  },
+  "cta": {
+    "label": "/ First campaign",
+    "title": "Turn your next product rush into testable variants.",
+    "detail": "Start in mock mode, plug Modal next, then add Stripe once the first renders are ready.",
+    "button": "Create an account"
+  },
+  "footer": {
+    "tagline": "AI ad variants for e-commerce",
+    "contact": "Contact",
+    "privacy": "Privacy policy",
+    "terms": "Terms",
+    "legal": "Legal notice"
+  },
+  "locale_switcher": {
+    "label": "Language",
+    "fr": "Français",
+    "en": "English"
+  },
+  "billing": {
+    "title": "Billing",
+    "section_label": "/ Settings / Billing",
+    "current_plan": "Current plan",
+    "monthly_quota": "Monthly quota",
+    "quota_remaining": "{used} / {total} exports this month — {remaining} remaining",
+    "features": {
+      "duration": "Max video duration",
+      "variants": "Max variants per project",
+      "voiceover": "AI voiceover",
+      "watermark": "No watermark",
+      "advanced_mode": "Advanced mode",
+      "included": "Included",
+      "not_included": "Not included"
+    },
+    "manage_subscription": "Manage subscription",
+    "upgrade": "Upgrade to a paid plan",
+    "error_generic": "Something went wrong. Please try again.",
+    "loading": "Loading..."
+  },
+  "pricing": {
+    "title": "Plans and credits",
+    "subtitle": "The MVP runs with `BILLING_DISABLED=true`. Stripe will be connected without blocking the render pipeline.",
+    "cta": "Try it",
+    "plans": {
+      "free": {
+        "name": "Free",
+        "price": "$0",
+        "credits": "2 exports / month",
+        "description": "To test the workflow. Edith watermark, 30 s max video."
+      },
+      "starter": {
+        "name": "Starter",
+        "price": "$9.99 / month",
+        "credits": "10 exports / month",
+        "description": "To get started. Dynamic captions, hooks, e-commerce presets."
+      },
+      "pro": {
+        "name": "Pro",
+        "price": "$19.99 / month",
+        "credits": "20 exports / month",
+        "description": "For active e-commerce sellers. AI voiceover, no watermark, light editing."
+      },
+      "agency": {
+        "name": "Agency",
+        "price": "$49.99 / month",
+        "credits": "30 exports / month",
+        "description": "Full advanced mode, timeline, brand kit, render priority."
+      }
+    }
+  },
+  "contact": {
+    "section_label": "/ Contact",
+    "title": "Let's talk about your creative ads pipeline.",
+    "subtitle": "Question about Edith, Modal, Supabase, credits or the e-commerce workflow? Send a message and keep your product context handy.",
+    "direct_title": "Direct contact",
+    "direct_detail": "For the MVP, the form opens your email client.",
+    "form": {
+      "name_placeholder": "Name",
+      "email_placeholder": "Email",
+      "message_placeholder": "Describe your need: video volume, formats, product types, presets...",
+      "send": "Send an email"
+    },
+    "topics": {
+      "partnership": {
+        "title": "E-commerce partnership",
+        "detail": "Be specific about your need and your store context for a more useful reply."
+      },
+      "support": {
+        "title": "Technical support",
+        "detail": "Describe the error, when it happened, the browser and source file if possible."
+      },
+      "billing": {
+        "title": "Billing question",
+        "detail": "Mention your plan, user ID and the relevant invoice."
+      }
+    }
+  },
+  "terms": {
+    "nav_contact": "Contact",
+    "section_label": "/ Terms of service",
+    "title": "Service terms.",
+    "subtitle": "Working document for the Edith MVP. It must be legally reviewed before commercial production.",
+    "sections": {
+      "object": {
+        "title": "Purpose",
+        "detail": "Edith is a SaaS for generating video ad variants for e-commerce and dropshipping."
+      },
+      "account": {
+        "title": "User account",
+        "detail": "The user is responsible for the security of their account, files and instructions sent."
+      },
+      "content": {
+        "title": "Submitted content",
+        "detail": "The user must hold the necessary rights to the videos, music, voices, texts, brands and assets provided."
+      },
+      "renders": {
+        "title": "Renders",
+        "detail": "Renders may vary based on source file quality, preset, instructions and connected external services."
+      },
+      "credits": {
+        "title": "Credits and payment",
+        "detail": "The credits/Stripe logic is prepared for the MVP and will need to be finalized before real billing."
+      },
+      "limits": {
+        "title": "Limits",
+        "detail": "Vercel performs no heavy video rendering. FFmpeg/transcription work is reserved for the Modal worker."
+      }
+    }
+  },
+  "privacy": {
+    "nav_contact": "Contact",
+    "section_label": "/ Privacy policy",
+    "title": "Privacy and data.",
+    "subtitle": "Working document for the Edith MVP. It must be reviewed and adapted by a professional before commercial use.",
+    "sections": {
+      "data_collected": {
+        "title": "Data collected",
+        "detail": "Edith may process account information, projects, uploaded video files, render instructions and technical metadata required for the service."
+      },
+      "usage": {
+        "title": "Usage",
+        "detail": "This data is used to authenticate the user, store assets, trigger renders, display statuses and improve the product workflow."
+      },
+      "storage": {
+        "title": "Storage",
+        "detail": "Source videos and exports are stored in Supabase Storage. Heavy render tasks are planned on Modal."
+      },
+      "secrets": {
+        "title": "Secrets",
+        "detail": "Service role, Modal and Stripe keys must never be exposed in the browser. They stay in server environments."
+      },
+      "retention": {
+        "title": "Retention",
+        "detail": "Retention duration will be specified for commercial production. The MVP keeps data necessary for account operation."
+      },
+      "contact": {
+        "title": "Contact",
+        "detail": "For data-related requests, contact contact@edith.video."
+      }
+    }
+  },
+  "legal": {
+    "nav_contact": "Contact",
+    "section_label": "/ Legal notice",
+    "title": "Legal information.",
+    "fields": {
+      "editor": {
+        "title": "Editor",
+        "detail": "Edith - legal information to be completed before commercial launch."
+      },
+      "publisher": {
+        "title": "Publishing manager",
+        "detail": "To be completed."
+      },
+      "contact": {
+        "title": "Contact",
+        "detail": "contact@edith.video"
+      },
+      "hosting": {
+        "title": "Hosting",
+        "detail": "Application hosted on Vercel. Data and files on Supabase. Heavy jobs on Modal."
+      },
+      "ip": {
+        "title": "Intellectual property",
+        "detail": "Brands, interfaces, texts and contents of the service are reserved unless otherwise noted."
+      },
+      "status": {
+        "title": "MVP status",
+        "detail": "This page is a structured placeholder for the MVP and must be legally completed."
+      }
+    }
+  },
+  "auth": {
+    "sign_out_button": "Sign out",
+    "login": {
+      "side_label": "/ Creator workspace",
+      "side_title": "Come back to your campaigns, variants and exports.",
+      "side_subtitle": "Sign in to create a project, upload product footage, and track Modal renders from the dashboard.",
+      "badge": "Secure Supabase sign-in",
+      "title": "Sign in",
+      "subtitle": "Access your Edith projects and launch your next ad variants.",
+      "email_placeholder": "email@store.com",
+      "password_placeholder": "Password",
+      "submit": "Sign in",
+      "submitting": "Signing in...",
+      "no_account": "Don't have an account yet?",
+      "create_account": "Create an Edith workspace",
+      "forgot_password_link": "Forgot password?"
+    },
+    "forgot_password": {
+      "side_label": "/ Recovery",
+      "side_title": "Take back control of your account.",
+      "side_subtitle": "Enter the email tied to your Edith workspace. You'll get a secure link to reset your password.",
+      "badge": "Supabase reset",
+      "title": "Forgot password",
+      "subtitle": "Tell us your email and we'll send a reset link.",
+      "email_placeholder": "email@store.com",
+      "submit": "Send the link",
+      "submitting": "Sending...",
+      "success": "If an account exists, an email with instructions has just been sent.",
+      "back_to_login": "Back to sign in"
+    },
+    "reset_password": {
+      "side_label": "/ New password",
+      "side_title": "Pick a strong password.",
+      "side_subtitle": "Use at least 8 characters. Avoid passwords already reused on other services.",
+      "badge": "Secure update",
+      "title": "Reset password",
+      "subtitle": "Set a new password for your Edith workspace.",
+      "new_password_placeholder": "New password",
+      "confirm_password_placeholder": "Confirm password",
+      "submit": "Update",
+      "submitting": "Updating...",
+      "mismatch_error": "Passwords do not match.",
+      "back_to_login": "Back to sign in"
+    },
+    "callback": {
+      "processing": "Signing you in..."
+    },
+    "errors": {
+      "callback_failed": "The sign-in link could not be verified. Request a new link.",
+      "missing_code": "Invalid or expired link. Start the sign-in flow again.",
+      "invalid_credentials": "Wrong email or password."
+    },
+    "register": {
+      "badge": "New workspace",
+      "title": "Create an account",
+      "subtitle": "Prepare your first pipeline: upload, preset, brief, variants.",
+      "shop_placeholder": "Store name",
+      "email_placeholder": "email@store.com",
+      "password_placeholder": "Password",
+      "submit": "Create my workspace",
+      "submitting": "Creating...",
+      "have_account": "Already registered?",
+      "sign_in": "Sign in",
+      "success": "Account created. Check your inbox if email confirmation is enabled.",
+      "side_label": "/ What you get",
+      "side_title": "A dashboard to produce ad variants, not to tinker with a timeline.",
+      "perks": {
+        "upload": "Direct Supabase Storage upload",
+        "presets": "UGC, e-commerce and product demo presets",
+        "modal": "Modal jobs ready for FFmpeg",
+        "credits": "Credits and Stripe ready to plug in"
+      }
+    },
+    "social": {
+      "back_to_landing": "Landing page",
+      "title": "Sign in or join now!",
+      "subtitle": "Log in or create your Edith account.",
+      "continue_google": "Continue with Google",
+      "or": "OR",
+      "email_helper": "Enter your email address to sign in or create an account",
+      "email_placeholder": "your.email@example.com",
+      "continue_email": "Continue with email",
+      "terms_prefix": "By clicking continue, you agree to our",
+      "terms_link": "Terms of Service",
+      "terms_and": "and",
+      "privacy_link": "Privacy Policy",
+      "testimonial": "This platform has helped me to save time and serve my clients faster than ever before.",
+      "testimonial_author": "~ Ali Hassan"
+    }
+  },
+  "dashboard": {
+    "header_label": "Edith dashboard",
+    "title": "Creative testing room",
+    "subtitle": "Steer your product footage, track Modal renders, and grab TikTok/Reels variants ready to test.",
+    "settings_cta": "Settings",
+    "new_project_cta": "New project",
+    "greeting": "Welcome, {email}",
+    "auth_notice": "Sign in to use Supabase Auth, Storage and Postgres. Mock mode is only available for local testing.",
+    "stats": {
+      "projects": "Projects",
+      "active_jobs": "Active jobs",
+      "exports": "Exports",
+      "completed_projects": "Completed projects",
+      "available_credits": "Available credits",
+      "credits_demo": "Demo"
+    },
+    "quota": {
+      "label": "Monthly quota",
+      "used_of_total": "{used} of {total} exports used",
+      "plan_label": "Plan {planName}",
+      "upgrade_link": "Manage subscription"
+    },
+    "recent_projects": "Recent projects",
+    "create": "Create",
+    "empty_title": "No rush transformed yet",
+    "empty_subtitle": "Start with a UGC video or a product demo. Edith will create project rows, variants and the job in the database.",
+    "empty_cta": "Create my first variant",
+    "empty_state": {
+      "title": "Create your first ads project",
+      "subtitle": "Upload product footage, pick your preset and let Edith generate the variants ready to test on TikTok, Reels and Facebook Ads.",
+      "cta": "Start a new project"
+    },
+    "project": {
+      "created_at": "Created {date}",
+      "preset_label": "Preset",
+      "format_label": "Format",
+      "variants_count": "{count, plural, =0 {No variants} =1 {1 variant} other {# variants}}",
+      "status": {
+        "draft": "Draft",
+        "uploaded": "Video received",
+        "queued": "Queued",
+        "transcribing": "Transcribing",
+        "planning": "Edit plan",
+        "rendering": "Rendering",
+        "completed": "Completed",
+        "failed": "Error",
+        "cancelled": "Cancelled"
+      }
+    },
+    "project_meta": "{preset} · {platform} · {format} · {count} variants",
+    "pipeline_title": "Current pipeline",
+    "pipeline": {
+      "auth": "Supabase Auth: ready",
+      "storage": "Supabase Storage: direct upload",
+      "postgres": "Supabase Postgres: projects, variants, jobs",
+      "modal": "Modal: configurable endpoint",
+      "stripe": "Stripe: non-blocking mode"
+    },
+    "credits_title": "MVP credits rule",
+    "credits_detail": "1 short variant = 5 credits. If `BILLING_DISABLED=true`, Edith lets the render through to test the pipeline.",
+    "status": {
+      "draft": "Draft",
+      "uploaded": "Video received",
+      "queued": "Queued",
+      "transcribing": "Transcribing",
+      "planning": "Edit plan",
+      "rendering": "Rendering",
+      "completed": "Completed",
+      "failed": "Error",
+      "cancelled": "Cancelled"
+    }
+  },
+  "settings": {
+    "back": "Dashboard",
+    "title": "Edith settings",
+    "subtitle": "Control the state of the SaaS: account, credits, Supabase, Modal, Stripe and security.",
+    "account": {
+      "title": "Account",
+      "disconnected": "Not signed in",
+      "view_dashboard": "View dashboard",
+      "sign_in": "Sign in"
+    },
+    "billing": {
+      "title": "Billing",
+      "stripe_active": "Stripe active",
+      "stripe_disabled": "Stripe disabled for the MVP",
+      "portal": "Billing portal"
+    },
+    "render": {
+      "title": "Render",
+      "modal_active": "Real Modal enabled",
+      "modal_mock": "Mock or database mode enabled",
+      "test_render": "Test a render"
+    },
+    "runtime_config": "Runtime configuration",
+    "runtime": {
+      "configured": "Configured",
+      "missing": "Missing"
+    },
+    "checks": {
+      "supabase_url": "Supabase URL",
+      "supabase_publishable": "Supabase publishable key",
+      "service_role": "Service role server key",
+      "modal_endpoint": "Modal endpoint URL",
+      "modal_webhook": "Modal webhook secret",
+      "stripe_key": "Stripe secret key"
+    },
+    "supabase": {
+      "title": "Supabase",
+      "detail": "Auth, Postgres RLS and the private `videos` bucket are the source of truth."
+    },
+    "modal": {
+      "title": "Modal + FFmpeg",
+      "detail": "Heavy renders run off Vercel through a secure Modal endpoint."
+    },
+    "security": {
+      "title": "MVP security",
+      "detail": "RLS enabled, Storage scoped per user folder, credits and Stripe written by the service role."
+    }
+  },
+  "projects": {
+    "list": {
+      "empty_title": "No projects found",
+      "empty_description": "Create a new project to get started.",
+      "create_button": "Create project",
+      "history_label": "Projects history"
+    },
+    "new": {
+      "label": "New project",
+      "title": "Turn footage into ad variants",
+      "subtitle": "Direct upload to Supabase Storage, project creation in the database, then Modal trigger if enabled. Vercel never renders the video.",
+      "upload": {
+        "title": "Source video",
+        "hint": "MP4, MOV or WebM. Private Supabase storage."
+      },
+      "project_name": "Project name",
+      "project_name_default": "Product creative test",
+      "preset": "Preset",
+      "preset_options": {
+        "ugc": "Dynamic UGC",
+        "ecommerce": "E-commerce ad",
+        "demo": "Product demo"
+      },
+      "platform": "Platform",
+      "platform_options": {
+        "tiktok": "TikTok Ads",
+        "reels": "Reels Ads",
+        "facebook": "Facebook Ads",
+        "shorts": "Shorts"
+      },
+      "format": "Format",
+      "format_options": {
+        "vertical": "9:16 vertical",
+        "square": "1:1 square",
+        "horizontal": "16:9 horizontal"
+      },
+      "variants": "Variants",
+      "variants_options": {
+        "one": "1 variant",
+        "three": "3 variants",
+        "five": "5 variants"
+      },
+      "language": "Language",
+      "language_options": {
+        "fr": "French",
+        "en": "English"
+      },
+      "instructions": "Instructions",
+      "instructions_placeholder": "E.g. test a benefit angle, a social proof angle and an urgency angle.",
+      "submit": "Generate variants",
+      "submitting": "Generating...",
+      "progress_upload": "Uploading to Supabase Storage...",
+      "progress_job": "Creating the render job...",
+      "error_video": "Choose a video file.",
+      "error_generic": "Could not start generation.",
+      "error_unknown": "Unknown error."
+    }
+  }
+}

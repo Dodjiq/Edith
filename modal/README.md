@@ -2,7 +2,7 @@
 
 This folder contains Edith's heavy video pipeline for Modal.
 
-Real rendering runs on Modal, never on Cloudflare.
+Real rendering runs on Modal, never on Vercel.
 
 ## Required environment
 
@@ -43,7 +43,7 @@ Then deploy:
 modal deploy modal/render_worker.py
 ```
 
-After deploy, copy the `submit_render_project` endpoint URL into Cloudflare:
+After deploy, copy the `submit_render_project` endpoint URL into Vercel:
 
 ```env
 ENABLE_REAL_MODAL=true

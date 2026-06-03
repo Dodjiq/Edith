@@ -2,9 +2,9 @@ import { getRenderProgress } from '@remotion/lambda/client';
 import type {
   GetProgressPayload,
   GetProgressResponse,
-} from '@/app/projects/[project-id]/_editor-container/editor/rendering/types';
-import { requireServerEnv } from '@/app/projects/[project-id]/_editor-container/editor/utils/server-env';
-import { getRemotionLambdaFunctionName } from '@/app/projects/[project-id]/_editor-container/remotion/get-remotion-lambda-function-name';
+} from '@/app/[locale]/projects/[project-id]/_editor-container/editor/rendering/types';
+import { requireServerEnv } from '@/app/[locale]/projects/[project-id]/_editor-container/editor/utils/server-env';
+import { getRemotionLambdaFunctionName } from '@/app/[locale]/projects/[project-id]/_editor-container/remotion/get-remotion-lambda-function-name';
 
 export const POST = async (request: Request) => {
   try {

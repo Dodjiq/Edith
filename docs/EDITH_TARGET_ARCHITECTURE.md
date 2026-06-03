@@ -3,7 +3,7 @@
 ## Diagramme texte
 
 ```txt
-Next.js App Router on Cloudflare Pages / OpenNext
+Next.js App Router on Vercel
   ↓
 Routes API légères Next.js
   ↓
@@ -22,7 +22,7 @@ Dashboard Edith avec polling ou Supabase Realtime
 
 ## Responsabilités
 
-### Cloudflare Pages / Workers
+### Vercel
 
 - Héberger l'application Next.js.
 - Gérer les pages publiques et dashboard.
@@ -97,7 +97,7 @@ Pour les gros fichiers, privilégier l'upload résumable Supabase/TUS si disponi
 - Si le job échoue techniquement, une transaction de remboursement est créée.
 - Si `BILLING_DISABLED=true`, l'API peut accorder des crédits de développement.
 
-## Limites Cloudflare à respecter
+## Limites Vercel à respecter
 
 - Pas de FFmpeg.
 - Pas de transcription.

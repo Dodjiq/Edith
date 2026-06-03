@@ -191,6 +191,39 @@ const renderVideoErrorResponseSchema = z.object({
 
 const renderVideoResponseSchema = z.union([renderVideoSuccessResponseSchema, renderVideoErrorResponseSchema]);
 
+// Edith project-render shared fields. The full request schema is built in the
+// frontend route by extending editPlanInputSchema; this exports the common
+// quota-aware fields so the route handler and any caller stay aligned.
+const startRenderRequestSchema = z.object({
+  projectName: z.string().trim().min(1).max(120).default('Campagne produit Edith'),
+  assetId: z.string().optional(),
+  storagePath: z.string().optional(),
+  fileName: z.string().optional(),
+  mimeType: z.string().optional(),
+  sizeBytes: z.number().optional(),
+  // Caller-provided asset duration so the server can enforce plan.maxDurationSeconds
+  // without an extra round trip. When omitted, the server falls back to
+  // project_assets.duration_seconds (see route handler).
+  durationSeconds: z.number().int().positive().optional(),
+  voiceoverRequested: z.boolean().optional().default(false),
+  advancedModeRequested: z.boolean().optional().default(false),
+});
+
+const startRenderQuotaErrorSchema = z.object({
+  error: z.enum([
+    'export_quota_exceeded',
+    'duration_exceeds_plan_limit',
+    'too_many_variants',
+    'voiceover_not_in_plan',
+    'advanced_mode_requires_upgrade',
+    'plan_resolution_failed',
+  ]),
+  plan: z.string().optional(),
+  monthlyExports: z.number().int().optional(),
+  maxDurationSeconds: z.number().int().optional(),
+  maxVariantsPerProject: z.number().int().optional(),
+});
+
 const removedSegmentFromSourceSchema = z.object({
   sourceStartInSeconds: z.number(),
   sourceEndInSeconds: z.number(),
@@ -617,3 +650,7 @@ export type RenderVideoPayload = z.infer<typeof renderVideoRequestSchema>;
 export type RenderVideoSuccessResponse = z.infer<typeof renderVideoSuccessResponseSchema>;
 export type RenderVideoErrorResponse = z.infer<typeof renderVideoErrorResponseSchema>;
 export type RenderVideoResponse = z.infer<typeof renderVideoResponseSchema>;
+
+export { startRenderRequestSchema, startRenderQuotaErrorSchema };
+export type StartRenderRequestBase = z.infer<typeof startRenderRequestSchema>;
+export type StartRenderQuotaError = z.infer<typeof startRenderQuotaErrorSchema>;

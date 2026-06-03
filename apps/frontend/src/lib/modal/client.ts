@@ -11,6 +11,10 @@ export type StartRenderJobInput = {
   instructions: string;
   variantsCount: number;
   language: EdithLanguage;
+  // Quota-derived flags forwarded to the Modal worker. Worker may ignore them
+  // until the Python contract catches up — they are purely additive.
+  applyWatermark?: boolean;
+  planKey?: string;
 };
 
 export type RenderJobStatus = {
@@ -44,6 +48,8 @@ export const startRenderJob = async (input: StartRenderJobInput): Promise<{ jobI
         instructions: input.instructions,
         variants_count: input.variantsCount,
         language: input.language,
+        apply_watermark: input.applyWatermark ?? false,
+        plan_key: input.planKey,
       }),
     });
 

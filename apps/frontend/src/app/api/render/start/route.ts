@@ -1,19 +1,53 @@
 import { NextResponse } from 'next/server';
-import { z } from 'zod';
+import { startRenderRequestSchema as sharedStartRenderRequestSchema } from 'api-types';
 import { editPlanInputSchema, generateMockEditPlan } from '@/lib/edit-plan/generate-edit-plan';
 import { completeMockRender, mockUserId, upsertMockProject } from '@/lib/mvp/mock-store';
 import { startRenderJob } from '@/lib/modal/client';
+import { checkExportQuota, incrementExportCounter, shouldApplyWatermark } from '@/lib/quota';
 import { createAdminClient } from '@/utils/supabase/admin';
 import { createClient } from '@/utils/supabase/server';
 
-const startRenderRequestSchema = editPlanInputSchema.extend({
-  projectName: z.string().trim().min(1).max(120).default('Campagne produit Edith'),
-  assetId: z.string().optional(),
-  storagePath: z.string().optional(),
-  fileName: z.string().optional(),
-  mimeType: z.string().optional(),
-  sizeBytes: z.number().optional(),
-});
+const startRenderRequestSchema = editPlanInputSchema.merge(sharedStartRenderRequestSchema);
+
+type QuotaErrorBody = {
+  error:
+    | 'export_quota_exceeded'
+    | 'duration_exceeds_plan_limit'
+    | 'too_many_variants'
+    | 'voiceover_not_in_plan'
+    | 'advanced_mode_requires_upgrade'
+    | 'plan_resolution_failed';
+  plan?: string;
+  monthlyExports?: number;
+  maxDurationSeconds?: number;
+  maxVariantsPerProject?: number;
+};
+
+const mapQuotaFailure = (
+  reason:
+    | 'plan_unknown'
+    | 'exceeded'
+    | 'duration_too_long'
+    | 'too_many_variants'
+    | 'voiceover_not_allowed'
+    | 'advanced_mode_required',
+): { status: number; body: QuotaErrorBody } => {
+  switch (reason) {
+    case 'exceeded':
+      return { status: 402, body: { error: 'export_quota_exceeded' } };
+    case 'duration_too_long':
+      return { status: 403, body: { error: 'duration_exceeds_plan_limit' } };
+    case 'too_many_variants':
+      return { status: 403, body: { error: 'too_many_variants' } };
+    case 'voiceover_not_allowed':
+      return { status: 403, body: { error: 'voiceover_not_in_plan' } };
+    case 'advanced_mode_required':
+      return { status: 403, body: { error: 'advanced_mode_requires_upgrade' } };
+    case 'plan_unknown':
+    default:
+      return { status: 500, body: { error: 'plan_resolution_failed' } };
+  }
+};
 
 export async function POST(request: Request) {
   const json = await request.json().catch(() => null);
@@ -33,6 +67,44 @@ export async function POST(request: Request) {
     const creditsNeeded = input.variantsCount * 5;
     const editPlan = generateMockEditPlan(input);
     const adminSupabase = createAdminClient();
+
+    // Resolve effective asset duration for the plan check.
+    // Priority: caller-supplied -> project_assets.duration_seconds -> 0 (skip check).
+    // TODO: when the upload flow stores duration before render dispatch we should
+    // fall back to a fresh project_assets lookup here instead of trusting the client.
+    let effectiveDurationSeconds = input.durationSeconds ?? 0;
+    if (!effectiveDurationSeconds && input.assetId) {
+      const { data: assetRow } = await adminSupabase
+        .from('project_assets')
+        .select('duration_seconds')
+        .eq('id', input.assetId)
+        .maybeSingle();
+      const dbDuration = (assetRow as { duration_seconds: number | null } | null)?.duration_seconds;
+      if (typeof dbDuration === 'number' && dbDuration > 0) {
+        effectiveDurationSeconds = Math.floor(dbDuration);
+      }
+    }
+    if (!effectiveDurationSeconds) {
+      console.warn('[render/start] duration unknown — skipping plan duration check', {
+        userId: user.id,
+        assetId: input.assetId,
+      });
+    }
+
+    const quota = await checkExportQuota(adminSupabase, user.id, {
+      durationSeconds: effectiveDurationSeconds,
+      variantsCount: input.variantsCount,
+      voiceoverRequested: input.voiceoverRequested ?? false,
+      advancedModeRequested: input.advancedModeRequested ?? false,
+    });
+
+    if (!quota.ok) {
+      const { status, body } = mapQuotaFailure(quota.reason);
+      return NextResponse.json(body, { status });
+    }
+
+    const plan = quota.plan;
+    const applyWatermark = shouldApplyWatermark(plan);
 
     const { data: credits } = await adminSupabase
       .from('user_credits')
@@ -124,7 +196,7 @@ export async function POST(request: Request) {
         instructions: input.instructions,
         variants_count: input.variantsCount,
         credits_reserved: creditsNeeded,
-        render_metadata: { editPlan },
+        render_metadata: { editPlan, planKey: plan.key, applyWatermark },
       })
       .select()
       .single();
@@ -173,6 +245,8 @@ export async function POST(request: Request) {
         instructions: input.instructions,
         variantsCount: input.variantsCount,
         language: input.language,
+        applyWatermark,
+        planKey: plan.key,
       });
 
       const isRealModal = process.env.ENABLE_REAL_MODAL === 'true';
@@ -187,11 +261,26 @@ export async function POST(request: Request) {
         await adminSupabase.from('render_jobs').update({ modal_job_id: modalJob.jobId }).eq('id', job.id);
       }
 
+      // Modal accepted the job — count one export per committed variant.
+      // Counter inconsistencies are recoverable; never fail the render request on this write.
+      try {
+        await incrementExportCounter(adminSupabase, user.id, input.variantsCount);
+      } catch (counterError) {
+        console.error('[render/start] export counter increment failed', {
+          userId: user.id,
+          projectId: project.id,
+          variantsCount: input.variantsCount,
+          error: counterError instanceof Error ? counterError.message : counterError,
+        });
+      }
+
       return NextResponse.json({
         project: { ...project, status: isRealModal ? project.status : 'completed' },
         job: { ...job, status: isRealModal ? job.status : 'completed', modal_job_id: modalJob.jobId },
         variants: isRealModal ? variants : variants.map((variant) => ({ ...variant, status: 'completed' })),
         mode: isRealModal ? 'modal' : 'database-mock',
+        plan: plan.key,
+        applyWatermark,
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Modal failed';
