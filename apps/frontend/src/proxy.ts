@@ -41,7 +41,7 @@ const buildLoginRedirect = (request: NextRequest, locale: Locale): NextResponse 
   return NextResponse.redirect(url);
 };
 
-export default async function middleware(request: NextRequest): Promise<NextResponse> {
+export default async function proxy(request: NextRequest): Promise<NextResponse> {
   // 1) Let next-intl resolve the locale and produce its response (rewrites / cookies).
   const response = intlMiddleware(request);
 

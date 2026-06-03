@@ -1,3 +1,4 @@
+# Legacy Cloudflare config, deployment moved to Vercel
 name = "edith"
 pages_build_output_dir = "apps/frontend/.vercel/output/static"
 compatibility_date = "2026-06-02"
