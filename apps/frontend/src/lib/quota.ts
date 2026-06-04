@@ -125,14 +125,21 @@ export const checkExportQuota = async (
   return { ok: true, plan, remaining: plan.monthlyExports - used };
 };
 
-// Increment the monthly export counter. Read-modify-write is racy; see the
-// integration plan for the recommended RPC migration. Caller MUST pass the
-// service-role admin client.
+// Increment the monthly export counter. Caller MUST pass the service-role admin client.
 export const incrementExportCounter = async (
   supabaseAdmin: SupabaseClient,
   userId: string,
   delta: number = 1,
 ): Promise<void> => {
+  // Prefer atomic RPC (migration 004); fall back to RMW if it doesn't exist yet.
+  const { error } = await supabaseAdmin.rpc('increment_user_exports', {
+    p_user_id: userId,
+    p_delta: delta,
+  });
+
+  if (!error) return;
+
+  // Fallback: best-effort read-modify-write (race-prone, but DB still consistent eventually).
   const { data } = await supabaseAdmin
     .from('user_credits')
     .select('monthly_exports_used')

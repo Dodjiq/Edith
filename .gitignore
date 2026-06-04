@@ -18,6 +18,8 @@ node_modules/
 **/.next/
 dist/
 **/dist/
+build/
+**/build/
 out/
 **/out/
 target/
@@ -34,5 +36,11 @@ temporary-files/
 
 # Local tool and editor state
 .DS_Store
+.idea/
 .playwright-mcp/
-.vscode/
+.vscode/*
+!.vscode/settings.example.json
+
+# Deployment tool state
+.modal.toml
+.vercel/

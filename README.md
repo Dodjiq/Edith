@@ -142,6 +142,17 @@ When adding or changing a route:
 - [`apps/media-processor/README.md`](./apps/media-processor/README.md)
 - [`docs/supabase`](./docs/supabase)
 
+## Deployment
+
+- **Frontend (Next.js 16)** — Vercel. Connect this repo, set Root Directory to `apps/frontend`, env vars: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `STRIPE_*`, `MODAL_RENDER_ENDPOINT_URL`, `MODAL_WEBHOOK_SECRET`, `OPENAI_API_KEY`. `vercel.json` handles regions + function timeouts.
+- **Backend (NestJS)** — Railway / Fly.io / Render. Long-lived WebSocket excludes Vercel Functions. Set the same Supabase + provider keys server-side.
+- **Modal worker** — `modal deploy modal/render_worker.py` (see `modal/DEPLOY.md`).
+- **Database** — Supabase migrations under `supabase/migrations/` applied via SQL Editor or the Supabase CLI.
+
+## CI
+
+GitHub Actions: typecheck (api-types + frontend + server tsc) and CI (lint + frontend build with mocked env) on every push/PR.
+
 ## Contributing
 
 See [`CONTRIBUTING.md`](./CONTRIBUTING.md) and [`SECURITY.md`](./SECURITY.md).

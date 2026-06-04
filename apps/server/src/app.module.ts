@@ -1,4 +1,5 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { MessagesModule } from './messages/messages.module';
@@ -17,18 +18,21 @@ import { UploadService } from './upload/upload.service';
 import { TwelveLabsService } from './video-analysis/twelve-labs/twelve-labs.service';
 import { VideoAnalysisService } from './video-analysis/video-analysis.service';
 import { RenderModule } from './render/render.module';
+import { AuthModule } from './auth/auth.module';
+import { SupabaseAuthGuard } from './auth/supabase-auth.guard';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+    AuthModule,
     MessagesModule,
     RealtimeModule,
     ToolsModule,
     AudioModule,
     CaptionsModule,
     ElevenlabsModule,
-    ConfigModule.forRoot({
-      isGlobal: true,
-    }),
     RenderModule,
   ],
   controllers: [AppController, UploadController],
@@ -40,6 +44,10 @@ import { RenderModule } from './render/render.module';
     UploadService,
     TwelveLabsService,
     VideoAnalysisService,
+    {
+      provide: APP_GUARD,
+      useClass: SupabaseAuthGuard,
+    },
   ],
 })
 export class AppModule implements NestModule {

@@ -8,6 +8,7 @@ import { SignOutButton } from '@/components/SignOutButton';
 import { getCurrentUser } from '@/lib/supabase/project-queries';
 import { createAdminClient } from '@/utils/supabase/admin';
 import { resolveUserPlan, getUsedExportsThisPeriod } from '@/lib/quota';
+import { DashboardLiveStatus } from './DashboardLiveStatus';
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -194,7 +195,20 @@ const DashboardPage = async ({ params }: Props) => {
             </h1>
             <p className="mt-3 max-w-2xl text-sm leading-6 text-neutral-400">{t('subtitle')}</p>
           </div>
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap items-center gap-3">
+            <DashboardLiveStatus
+              userId={user.id}
+              projects={projects.map((project) => ({
+                id: project.id,
+                status: project.status,
+                error_message: null,
+              }))}
+              labels={{
+                live: locale === 'en' ? 'Live' : 'En direct',
+                connecting: locale === 'en' ? 'Connecting' : 'Connexion',
+                offline: locale === 'en' ? 'Offline' : 'Hors ligne',
+              }}
+            />
             <Button asChild>
               <Link href="/projects/new">
                 <Plus className="size-4" />

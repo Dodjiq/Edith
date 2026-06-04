@@ -1,4 +1,7 @@
+'use client';
+
 import { PencilIcon, PlusIcon, Trash2Icon } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 
 import { IconButton } from '@/components/buttons/IconButton';
@@ -38,6 +41,7 @@ export const PresetPanel: React.FC<PresetPanelProps> = ({
   onUpdatePreset,
   onDeletePreset,
 }) => {
+  const t = useTranslations('projects_editor.chatbot');
   const [newPresetTitle, setNewPresetTitle] = useState<string>('');
   const [newPresetPrompt, setNewPresetPrompt] = useState<string>('');
   const [editingPreset, setEditingPreset] = useState<Preset | null>(null);
@@ -87,10 +91,8 @@ export const PresetPanel: React.FC<PresetPanelProps> = ({
       <div className="flex-1 overflow-y-auto p-1">
         {presets.length === 0 ? (
           <div className="flex h-full flex-col items-center justify-center gap-2 p-4 text-center">
-            <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">No presets yet</p>
-            <p className="text-xs text-zinc-500 dark:text-zinc-400">
-              Create a preset to save your favorite prompts for quick access.
-            </p>
+            <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{t('preset_empty_title')}</p>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400">{t('preset_empty_description')}</p>
           </div>
         ) : (
           <div className="flex flex-col gap-2 p-2">
@@ -111,13 +113,13 @@ export const PresetPanel: React.FC<PresetPanelProps> = ({
                         size="xs"
                         variant="ghost"
                         className="text-zinc-500 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100 hover:text-zinc-100"
-                        aria-label={`Edit preset ${preset.title}`}
+                        aria-label={t('preset_edit_aria', { title: preset.title })}
                         onClick={() => openEditDialog(preset)}
                       >
                         <PencilIcon className="size-4" />
                       </IconButton>
                     </TooltipTrigger>
-                    <TooltipPanel>Edit preset</TooltipPanel>
+                    <TooltipPanel>{t('preset_edit')}</TooltipPanel>
                   </Tooltip>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -126,13 +128,13 @@ export const PresetPanel: React.FC<PresetPanelProps> = ({
                         size="xs"
                         variant="ghost"
                         className="text-zinc-500 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100 hover:text-red-500"
-                        aria-label={`Delete preset ${preset.title}`}
+                        aria-label={t('preset_delete_aria', { title: preset.title })}
                         onClick={() => onDeletePreset(preset.id)}
                       >
                         <Trash2Icon className="size-4" />
                       </IconButton>
                     </TooltipTrigger>
-                    <TooltipPanel>Delete preset</TooltipPanel>
+                    <TooltipPanel>{t('preset_delete')}</TooltipPanel>
                   </Tooltip>
                 </div>
               </div>
@@ -144,40 +146,40 @@ export const PresetPanel: React.FC<PresetPanelProps> = ({
       <div className="border-t border-zinc-200 p-4 dark:border-zinc-800">
         <Button className="w-full gap-2" onClick={openCreateDialog}>
           <PlusIcon className="size-4" />
-          Add Preset
+          {t('preset_add')}
         </Button>
       </div>
 
       <Dialog open={isDialogOpen} onOpenChange={onDialogOpenChange}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{isEditingPreset ? 'Update preset' : 'Create new preset'}</DialogTitle>
+            <DialogTitle>
+              {isEditingPreset ? t('preset_dialog_update_title') : t('preset_dialog_create_title')}
+            </DialogTitle>
             <DialogDescription>
-              {isEditingPreset
-                ? 'Adjust this preset and save your changes for all projects in this browser.'
-                : 'Save a custom prompt as a preset to reuse it later. Useful for tasks that you do frequently.'}
+              {isEditingPreset ? t('preset_dialog_update_description') : t('preset_dialog_create_description')}
             </DialogDescription>
           </DialogHeader>
 
           <div className="flex flex-col gap-4 py-4">
             <div className="flex flex-col gap-2">
               <label htmlFor="title" className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
-                Title
+                {t('preset_field_title')}
               </label>
               <Input
                 id="title"
-                placeholder="e.g., Silence Removal & B-Roll"
+                placeholder={t('preset_field_title_placeholder')}
                 value={newPresetTitle}
                 onChange={(e) => setNewPresetTitle(e.target.value)}
               />
             </div>
             <div className="flex flex-col gap-2">
               <label htmlFor="prompt" className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
-                Prompt
+                {t('preset_field_prompt')}
               </label>
               <Textarea
                 id="prompt"
-                placeholder="e.g., Remove all silences longer than 2 seconds, then add b-roll footage of nature scenes every 15 seconds..."
+                placeholder={t('preset_field_prompt_placeholder')}
                 className="min-h-[100px] resize-none"
                 value={newPresetPrompt}
                 onChange={(e) => setNewPresetPrompt(e.target.value)}
@@ -187,10 +189,10 @@ export const PresetPanel: React.FC<PresetPanelProps> = ({
 
           <DialogFooter>
             <Button variant="ghost" onClick={() => onDialogOpenChange(false)}>
-              Cancel
+              {t('preset_dialog_cancel')}
             </Button>
             <Button onClick={handleSavePreset} disabled={!newPresetTitle.trim() || !newPresetPrompt.trim()}>
-              {isEditingPreset ? 'Update Preset' : 'Save Preset'}
+              {isEditingPreset ? t('preset_rename') : t('preset_save')}
             </Button>
           </DialogFooter>
         </DialogContent>

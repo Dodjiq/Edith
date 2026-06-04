@@ -39,6 +39,12 @@ import {
   createGetProjectStateTool,
   createGetItemsDataTool,
 } from './tool-creators';
+import {
+  createGenerateEcommerceAnglesTool,
+  createGenerateHookVariantsTool,
+  createGenerateAdEditPlanTool,
+  createApplyEcommercePresetTool,
+} from './tool-creators/ecommerce';
 
 @Injectable()
 export class ToolsService {
@@ -88,6 +94,11 @@ export class ToolsService {
       // Plan tools
       [editorToolNames.createPlan]: createCreatePlanTool(),
       [editorToolNames.updatePlan]: createUpdatePlanTool(),
+      // E-commerce ad tools (Edith)
+      [editorToolNames.generateEcommerceAngles]: createGenerateEcommerceAnglesTool(deps, context),
+      [editorToolNames.generateHookVariants]: createGenerateHookVariantsTool(deps, context),
+      [editorToolNames.generateAdEditPlan]: createGenerateAdEditPlanTool(deps, context),
+      [editorToolNames.applyEcommercePreset]: createApplyEcommercePresetTool(deps, context),
     };
   }
 

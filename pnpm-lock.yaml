@@ -297,6 +297,9 @@ importers:
       '@remotion/renderer':
         specifier: ^4.0.461
         version: 4.0.461(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+      '@supabase/supabase-js':
+        specifier: ^2.106.2
+        version: 2.106.2
       '@ts-rest/core':
         specifier: ^3.52.1
         version: 3.52.1(@types/node@25.8.0)(zod@3.25.76)

@@ -2,8 +2,10 @@ import { Controller } from '@nestjs/common';
 import { TsRestHandler, tsRestHandler } from '@ts-rest/nest';
 import { apiContracts } from 'api-types';
 import { AppService } from './app.service';
+import { Public } from './auth/public.decorator';
 
 @Controller()
+@Public()
 export class AppController {
   constructor(private readonly appService: AppService) {}
 

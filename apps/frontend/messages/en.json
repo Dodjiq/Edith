@@ -5,7 +5,8 @@
     "pricing": "Pricing",
     "contact": "Contact",
     "login": "Sign in",
-    "try": "Try it"
+    "try": "Try it",
+    "dashboard": "Dashboard"
   },
   "hero": {
     "badge": "AI ad variant engine for e-commerce",
@@ -185,7 +186,8 @@
   },
   "pricing": {
     "title": "Plans and credits",
-    "subtitle": "The MVP runs with `BILLING_DISABLED=true`. Stripe will be connected without blocking the render pipeline.",
+    "subtitle": "Pick the plan that matches your creative testing volume.",
+    "dev_banner": "Test mode — Stripe disabled. Sign up to explore the app.",
     "cta": "Try it",
     "plans": {
       "free": {
@@ -553,6 +555,11 @@
       "create_button": "Create project",
       "history_label": "Projects history"
     },
+    "projects_list": {
+      "title": "My projects",
+      "empty_state": "No projects yet",
+      "cta": "Create a project"
+    },
     "new": {
       "label": "New project",
       "title": "Turn footage into ad variants",
@@ -602,6 +609,48 @@
       "error_video": "Choose a video file.",
       "error_generic": "Could not start generation.",
       "error_unknown": "Unknown error."
+    }
+  },
+  "projects_editor": {
+    "chatbot": {
+      "header_title": "Edith Assistant",
+      "subtitle": "AI assistant",
+      "tab_chat": "Chat",
+      "tab_preset": "Preset",
+      "new_chat": "New chat",
+      "new_chat_aria": "New chat",
+      "prompt_placeholder": "Ask the AI assistant to edit your video...",
+      "send_button": "Send",
+      "stop_button": "Stop",
+      "regenerate_button": "Regenerate",
+      "presets_title": "Presets",
+      "preset_apply": "Apply preset",
+      "preset_save": "Save Preset",
+      "preset_rename": "Update Preset",
+      "preset_delete": "Delete preset",
+      "preset_edit": "Edit preset",
+      "preset_edit_aria": "Edit preset {title}",
+      "preset_delete_aria": "Delete preset {title}",
+      "preset_add": "Add Preset",
+      "preset_empty_title": "No presets yet",
+      "preset_empty_description": "Create a preset to save your favorite prompts for quick access.",
+      "preset_dialog_create_title": "Create new preset",
+      "preset_dialog_update_title": "Update preset",
+      "preset_dialog_create_description": "Save a custom prompt as a preset to reuse it later. Useful for tasks that you do frequently.",
+      "preset_dialog_update_description": "Adjust this preset and save your changes for all projects in this browser.",
+      "preset_field_title": "Title",
+      "preset_field_prompt": "Prompt",
+      "preset_field_title_placeholder": "e.g., Silence Removal & B-Roll",
+      "preset_field_prompt_placeholder": "e.g., Remove all silences longer than 2 seconds, then add b-roll footage of nature scenes every 15 seconds...",
+      "preset_dialog_cancel": "Cancel",
+      "empty_state": "Start a conversation with the AI assistant."
+    },
+    "tools": {
+      "cursor": "Select",
+      "cut": "Cut",
+      "text": "Text",
+      "crop": "Crop",
+      "audio": "Audio"
     }
   }
 }

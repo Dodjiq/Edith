@@ -12,6 +12,7 @@ const PricingPage = async ({ params }: Props) => {
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations('pricing');
+  const isBillingDisabled = process.env.BILLING_DISABLED === 'true';
 
   return (
     <main className="min-h-screen bg-neutral-950 px-6 py-8 text-white">
@@ -23,6 +24,14 @@ const PricingPage = async ({ params }: Props) => {
           <h1 className="mt-4 text-4xl font-semibold">{t('title')}</h1>
           <p className="mt-3 text-neutral-400">{t('subtitle')}</p>
         </header>
+        {isBillingDisabled ? (
+          <div
+            role="status"
+            className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-200"
+          >
+            {t('dev_banner')}
+          </div>
+        ) : null}
         <section className="grid gap-4 md:grid-cols-4">
           {planKeys.map((key) => (
             <article key={key} className="rounded-lg border border-white/10 bg-white/[0.04] p-5">

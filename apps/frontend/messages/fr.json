@@ -5,7 +5,8 @@
     "pricing": "Tarifs",
     "contact": "Contact",
     "login": "Connexion",
-    "try": "Essayer"
+    "try": "Essayer",
+    "dashboard": "Dashboard"
   },
   "hero": {
     "badge": "Moteur IA de variantes ads e-commerce",
@@ -185,7 +186,8 @@
   },
   "pricing": {
     "title": "Plans et crédits",
-    "subtitle": "Le MVP fonctionne avec `BILLING_DISABLED=true`. Stripe sera branché sans bloquer le pipeline de rendu.",
+    "subtitle": "Choisis le plan qui correspond à ton volume de tests créatifs.",
+    "dev_banner": "Mode test — Stripe désactivé. Inscris-toi pour explorer l'app.",
     "cta": "Tester",
     "plans": {
       "free": {
@@ -553,6 +555,11 @@
       "create_button": "Créer un projet",
       "history_label": "Historique des projets"
     },
+    "projects_list": {
+      "title": "Mes projets",
+      "empty_state": "Aucun projet pour l'instant",
+      "cta": "Créer un projet"
+    },
     "new": {
       "label": "Nouveau projet",
       "title": "Transformer un rush en variantes ads",
@@ -602,6 +609,48 @@
       "error_video": "Choisis un fichier vidéo.",
       "error_generic": "Impossible de lancer la génération.",
       "error_unknown": "Erreur inconnue."
+    }
+  },
+  "projects_editor": {
+    "chatbot": {
+      "header_title": "Assistant Edith",
+      "subtitle": "Assistant IA",
+      "tab_chat": "Chat",
+      "tab_preset": "Preset",
+      "new_chat": "Nouveau chat",
+      "new_chat_aria": "Nouveau chat",
+      "prompt_placeholder": "Demande à l'assistant IA de monter ta vidéo...",
+      "send_button": "Envoyer",
+      "stop_button": "Arrêter",
+      "regenerate_button": "Régénérer",
+      "presets_title": "Presets",
+      "preset_apply": "Appliquer le preset",
+      "preset_save": "Enregistrer le preset",
+      "preset_rename": "Mettre à jour le preset",
+      "preset_delete": "Supprimer le preset",
+      "preset_edit": "Modifier le preset",
+      "preset_edit_aria": "Modifier le preset {title}",
+      "preset_delete_aria": "Supprimer le preset {title}",
+      "preset_add": "Ajouter un preset",
+      "preset_empty_title": "Aucun preset pour le moment",
+      "preset_empty_description": "Crée un preset pour enregistrer tes prompts favoris et y accéder rapidement.",
+      "preset_dialog_create_title": "Créer un nouveau preset",
+      "preset_dialog_update_title": "Mettre à jour le preset",
+      "preset_dialog_create_description": "Enregistre un prompt personnalisé en preset pour le réutiliser plus tard. Utile pour les tâches récurrentes.",
+      "preset_dialog_update_description": "Ajuste ce preset et enregistre tes modifications pour tous les projets de ce navigateur.",
+      "preset_field_title": "Titre",
+      "preset_field_prompt": "Prompt",
+      "preset_field_title_placeholder": "Ex : Suppression des silences et B-Roll",
+      "preset_field_prompt_placeholder": "Ex : Supprime tous les silences de plus de 2 secondes, puis ajoute des plans B-roll de nature toutes les 15 secondes...",
+      "preset_dialog_cancel": "Annuler",
+      "empty_state": "Commence une conversation avec l'assistant IA."
+    },
+    "tools": {
+      "cursor": "Sélection",
+      "cut": "Couper",
+      "text": "Texte",
+      "crop": "Recadrer",
+      "audio": "Audio"
     }
   }
 }

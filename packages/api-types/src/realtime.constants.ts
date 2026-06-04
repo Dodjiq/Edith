@@ -49,6 +49,11 @@ export const editorToolNames = {
   getDetailedTranscription: 'get_detailed_transcription',
   createPlan: 'create_plan',
   updatePlan: 'update_plan',
+  // E-commerce ad tools (Edith)
+  generateEcommerceAngles: 'generate_ecommerce_angles',
+  generateHookVariants: 'generate_hook_variants',
+  generateAdEditPlan: 'generate_ad_edit_plan',
+  applyEcommercePreset: 'apply_ecommerce_preset',
 } as const satisfies Record<string, string>;
 
 export type EditorToolName = (typeof editorToolNames)[keyof typeof editorToolNames];

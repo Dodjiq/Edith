@@ -1,4 +1,7 @@
+'use client';
+
 import { PlayerRef } from '@remotion/player';
+import { useTranslations } from 'next-intl';
 import React, { useCallback, useContext } from 'react';
 import { IconButton } from '@/components/buttons/IconButton';
 import { Tooltip, TooltipTrigger, TooltipPanel } from '@/components/ui/tooltip';
@@ -13,6 +16,7 @@ import { useProjectId } from '../utils/use-project-id';
 export const ToolSelection: React.FC<{
   playerRef: React.RefObject<PlayerRef | null>;
 }> = ({ playerRef }) => {
+  const t = useTranslations('projects_editor.tools');
   const timelineWriteContext = useWriteContext();
   const projectId = useProjectId();
   const { editMode, setEditMode } = useContext(EditModeContext);
@@ -91,14 +95,14 @@ export const ToolSelection: React.FC<{
               variant="ghost"
               size="sm"
               onClick={setSelectEditMode}
-              aria-label="Select"
+              aria-label={t('cursor')}
               data-active={editMode === 'select'}
               className="text-white data-[active=true]:bg-white/10"
             >
               <EditModeIcon fill="none" stroke="currentColor" strokeWidth="2" className="w-4" />
             </IconButton>
           </TooltipTrigger>
-          <TooltipPanel>Select</TooltipPanel>
+          <TooltipPanel>{t('cursor')}</TooltipPanel>
         </Tooltip>
       </div>
     </>

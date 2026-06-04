@@ -8,6 +8,7 @@ import {
   PromptInputSubmit,
   PromptInputTextarea,
 } from '@/app/[locale]/projects/[project-id]/_chatbot/chatbot-components/ai-elements/prompt-input/prompt-input';
+import { useTranslations } from 'next-intl';
 import type { ChangeEvent, FC, KeyboardEvent } from 'react';
 import type { ChatMode } from 'api-types';
 
@@ -35,6 +36,8 @@ export const ChatbotPromptInput: FC<ChatbotPromptInputProps> = ({
   onStop,
   isStopping,
 }) => {
+  const t = useTranslations('projects_editor.chatbot');
+
   const handleTextareaChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
     onInputChange(event.target.value);
   };
@@ -64,7 +67,7 @@ export const ChatbotPromptInput: FC<ChatbotPromptInputProps> = ({
           onChange={handleTextareaChange}
           onKeyDown={handleTextareaKeyDown}
           value={value}
-          placeholder="Ask the AI assistant to edit your video..."
+          placeholder={t('prompt_placeholder')}
         />
       </PromptInputBody>
       <PromptInputFooter className="flex items-center justify-between gap-3">

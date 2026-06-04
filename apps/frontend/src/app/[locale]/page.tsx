@@ -23,6 +23,8 @@ import { Reveal } from '@/components/landing/reveal';
 import { Link } from '@/i18n/navigation';
 import NextLink from 'next/link';
 import LocaleSwitcher from '@/components/LocaleSwitcher';
+import { SignOutButton } from '@/components/SignOutButton';
+import { createClient } from '@/utils/supabase/server';
 
 const headingStyle = { fontFamily: 'Georgia, "Times New Roman", serif' };
 
@@ -32,6 +34,12 @@ const Home = async ({ params }: Props) => {
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations();
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const isAuthenticated = user !== null;
 
   const navLinks: Array<{ label: string; href: string; external?: boolean }> = [
     { label: t('nav.product'), href: '#produit', external: true },
@@ -87,19 +95,34 @@ const Home = async ({ params }: Props) => {
           </div>
           <div className="flex items-center gap-2">
             <LocaleSwitcher />
-            <Button
-              asChild
-              variant="ghost"
-              className="hidden h-9 rounded-full px-4 text-[#d7d0ca] hover:bg-white/[0.06] hover:text-white sm:inline-flex"
-            >
-              <Link href="/auth/login">{t('nav.login')}</Link>
-            </Button>
-            <Button asChild className="h-9 rounded-full bg-[#f1ece6] px-4 text-[#130f0d] hover:bg-white">
-              <Link href="/auth/register">
-                {t('nav.try')}
-                <ArrowRight className="size-4" />
-              </Link>
-            </Button>
+            {isAuthenticated ? (
+              <>
+                <Button
+                  asChild
+                  variant="ghost"
+                  className="hidden h-9 rounded-full px-4 text-[#d7d0ca] hover:bg-white/[0.06] hover:text-white sm:inline-flex"
+                >
+                  <Link href="/dashboard">{t('nav.dashboard')}</Link>
+                </Button>
+                <SignOutButton variant="ghost" />
+              </>
+            ) : (
+              <>
+                <Button
+                  asChild
+                  variant="ghost"
+                  className="hidden h-9 rounded-full px-4 text-[#d7d0ca] hover:bg-white/[0.06] hover:text-white sm:inline-flex"
+                >
+                  <Link href="/auth/login">{t('nav.login')}</Link>
+                </Button>
+                <Button asChild className="h-9 rounded-full bg-[#f1ece6] px-4 text-[#130f0d] hover:bg-white">
+                  <Link href="/auth/register">
+                    {t('nav.try')}
+                    <ArrowRight className="size-4" />
+                  </Link>
+                </Button>
+              </>
+            )}
           </div>
         </nav>
 
