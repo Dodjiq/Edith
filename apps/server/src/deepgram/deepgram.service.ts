@@ -37,12 +37,13 @@ export interface DeepgramResponse {
 @Injectable()
 export class DeepgramService {
   private readonly logger = new Logger(DeepgramService.name);
-  private readonly deepgram: DeepgramClient;
+  private readonly deepgram: DeepgramClient | null = null;
 
   constructor(private configService: ConfigService) {
     const deepgramKey = this.configService.get<string>('DEEPGRAM_API_KEY');
     if (!deepgramKey) {
-      throw new Error('DEEPGRAM_API_KEY is not defined');
+      this.logger.warn('DEEPGRAM_API_KEY missing — Deepgram transcription disabled');
+      return;
     }
 
     this.deepgram = new DeepgramClient({ apiKey: deepgramKey });
@@ -55,6 +56,9 @@ export class DeepgramService {
     input: string | Buffer;
     originalLanguage?: string;
   }): Promise<DeepgramResponse> {
+    if (!this.deepgram) {
+      throw new Error('Deepgram client not initialized — DEEPGRAM_API_KEY missing');
+    }
     this.logger.debug('Transcribing audio with Deepgram...');
 
     try {

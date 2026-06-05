@@ -19,12 +19,13 @@ export type ElevenlabsTranscriptionResult = {
 @Injectable()
 export class ElevenlabsService {
   private readonly logger = new Logger(ElevenlabsService.name);
-  private readonly client: ElevenLabsClient;
+  private readonly client: ElevenLabsClient | null = null;
 
   constructor(private readonly configService: ConfigService) {
     const apiKey = this.configService.get<string>('ELEVENLABS_API_KEY');
     if (!apiKey) {
-      throw new Error('ELEVENLABS_API_KEY is not defined');
+      this.logger.warn('ELEVENLABS_API_KEY missing — transcription disabled');
+      return;
     }
 
     this.client = new ElevenLabsClient({ apiKey });
@@ -37,6 +38,9 @@ export class ElevenlabsService {
     input: string | Buffer;
     originalLanguage?: string;
   }): Promise<ElevenlabsTranscriptionResult> {
+    if (!this.client) {
+      throw new Error('ElevenLabs client not initialized — ELEVENLABS_API_KEY missing');
+    }
     if (typeof input !== 'string') {
       return this.transcribeFromBuffer({ buffer: input, originalLanguage });
     }
@@ -72,6 +76,9 @@ export class ElevenlabsService {
     url: string;
     originalLanguage?: string;
   }): Promise<ElevenlabsTranscriptionResult> {
+    if (!this.client) {
+      throw new Error('ElevenLabs client not initialized — ELEVENLABS_API_KEY missing');
+    }
     this.logger.log('Transcribing cloud URL with ElevenLabs Scribe v2...');
 
     try {
@@ -96,6 +103,9 @@ export class ElevenlabsService {
     mimeType?: string;
     originalLanguage?: string;
   }): Promise<ElevenlabsTranscriptionResult> {
+    if (!this.client) {
+      throw new Error('ElevenLabs client not initialized — ELEVENLABS_API_KEY missing');
+    }
     const totalStart = Date.now();
     this.logger.log(
       `[TIMING] Starting ElevenLabs Scribe v2 transcription: ${(buffer.length / 1024 / 1024).toFixed(2)} MB`,
