@@ -5,11 +5,6 @@ import { createAdminClient } from '@/utils/supabase/admin';
 import { getPlanByPriceId, type PlanConfig } from '@/lib/plans';
 import { stripe } from '@/lib/stripe';
 
-// Stripe webhooks require the raw request body for signature verification.
-// In App Router we obtain it via `request.text()`. Force Node runtime.
-export const runtime = 'nodejs';
-export const dynamic = 'force-dynamic';
-
 type AdminClient = ReturnType<typeof createAdminClient>;
 
 const toIsoFromUnix = (unix: number | null | undefined): string | null => {
