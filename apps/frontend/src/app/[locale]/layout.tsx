@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Script from 'next/script';
 import localFont from 'next/font/local';
+import { Inter } from 'next/font/google';
 import { NextIntlClientProvider, hasLocale } from 'next-intl';
 import { notFound } from 'next/navigation';
 import { setRequestLocale } from 'next-intl/server';
@@ -35,10 +36,16 @@ const poppins = localFont({
   display: 'swap',
 });
 
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-inter',
+  display: 'swap',
+});
+
 export const metadata: Metadata = {
-  title: 'Edith',
+  title: 'Edit — Create winning ads in minutes',
   description:
-    'Edith transforme des rushs produit en variantes publicitaires video pretes a tester pour e-commerce et dropshipping.',
+    'Edit is the AI creative engine that generates high-performing ad creatives from your raw footage. Upload, describe, launch.',
   icons: {
     icon: '/icon.svg',
   },
@@ -80,7 +87,7 @@ export default async function LocaleLayout({
           />
         )}
       </head>
-      <body className={`${poppins.variable} antialiased`}>
+      <body className={`${poppins.variable} ${inter.variable} antialiased`}>
         <NextIntlClientProvider>
           <Provider>{children}</Provider>
         </NextIntlClientProvider>
@@ -88,3 +95,4 @@ export default async function LocaleLayout({
     </html>
   );
 }
+
