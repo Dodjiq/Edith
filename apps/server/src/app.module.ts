@@ -17,6 +17,9 @@ import { UploadService } from './upload/upload.service';
 import { TwelveLabsService } from './video-analysis/twelve-labs/twelve-labs.service';
 import { VideoAnalysisService } from './video-analysis/video-analysis.service';
 import { RenderModule } from './render/render.module';
+import { SupabaseModule } from './supabase/supabase.module';
+import { EdithModule } from './edith/edith.module';
+import { StripeModule } from './stripe/stripe.module';
 
 @Module({
   imports: [
@@ -30,6 +33,9 @@ import { RenderModule } from './render/render.module';
       isGlobal: true,
     }),
     RenderModule,
+    SupabaseModule,
+    EdithModule,
+    StripeModule,
   ],
   controllers: [AppController, UploadController],
   providers: [

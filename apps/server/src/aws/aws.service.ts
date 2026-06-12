@@ -24,26 +24,31 @@ const TARGET_PARTS = 100; // Target number of parts for optimal parallelism
 
 @Injectable()
 export class AwsService {
-  private readonly s3Client: S3Client;
+  private _s3Client: S3Client | null = null;
   private readonly bucketName: string;
   private readonly region: string;
   private readonly transferAcceleration: boolean;
 
   constructor(private readonly configService: ConfigService) {
-    this.bucketName = this.configService.get<string>('REMOTION_AWS_BUCKET_NAME') ?? '';
-    this.region = this.configService.get<string>('REMOTION_AWS_REGION') ?? 'us-east-1';
+    this.bucketName = this.configService.get<string>('REMOTION_AWS_BUCKET_NAME') || '';
+    this.region = this.configService.get<string>('REMOTION_AWS_REGION') || 'us-east-1';
     this.transferAcceleration =
       this.configService.get<string>('REMOTION_AWS_TRANSFER_ACCELERATION') === 'true' ||
       this.configService.get<string>('REMOTION_AWS_TRANSFER_ACCELERATION') === '1';
+  }
 
-    this.s3Client = new S3Client({
-      region: this.region,
-      credentials: {
-        accessKeyId: this.configService.get<string>('REMOTION_AWS_ACCESS_KEY_ID') ?? '',
-        secretAccessKey: this.configService.get<string>('REMOTION_AWS_SECRET_ACCESS_KEY') ?? '',
-      },
-      useAccelerateEndpoint: this.transferAcceleration,
-    });
+  private get s3Client(): S3Client {
+    if (!this._s3Client) {
+      this._s3Client = new S3Client({
+        region: this.region,
+        credentials: {
+          accessKeyId: this.configService.get<string>('REMOTION_AWS_ACCESS_KEY_ID') || 'placeholder',
+          secretAccessKey: this.configService.get<string>('REMOTION_AWS_SECRET_ACCESS_KEY') || 'placeholder',
+        },
+        useAccelerateEndpoint: this.transferAcceleration,
+      });
+    }
+    return this._s3Client;
   }
 
   generateFileKey(filename?: string): string {

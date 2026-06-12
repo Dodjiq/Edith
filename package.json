@@ -22,6 +22,7 @@
   ],
   "author": "Kevin Rousseau",
   "pnpm": {
+    "onlyBuiltDependencies": ["@nestjs/core", "esbuild", "sharp", "unrs-resolver"],
     "overrides": {
       "react-router": "7.12.0",
       "socket.io-parser": "4.2.6",

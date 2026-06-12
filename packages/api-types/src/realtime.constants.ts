@@ -7,6 +7,10 @@ export const realtimeMessageTypes = {
   uploadProgress: 'upload:progress',
   transcriptionComplete: 'upload:transcriptionComplete',
   videoAnalysisComplete: 'upload:videoAnalysisComplete',
+  edithRenderProgress: 'edith:renderProgress',
+  edithVariantComplete: 'edith:variantComplete',
+  edithJobComplete: 'edith:jobComplete',
+  edithJobFailed: 'edith:jobFailed',
 } as const satisfies Record<string, string>;
 
 export type KnownRealtimeMessageType = (typeof realtimeMessageTypes)[keyof typeof realtimeMessageTypes];
@@ -658,4 +662,29 @@ export type VideoAnalysisCompletePayload = {
   twelveLabs?: TwelveLabsVideoReference;
   summary?: VideoAnalysisSummary;
   error?: string;
+};
+
+export type EdithRenderProgressPayload = {
+  jobId: string;
+  variantId: string;
+  variantIndex: number;
+  progress: number;
+};
+
+export type EdithVariantCompletePayload = {
+  jobId: string;
+  variantId: string;
+  exportPath: string;
+};
+
+export type EdithJobCompletePayload = {
+  jobId: string;
+  projectId: string;
+  completedVariants: number;
+};
+
+export type EdithJobFailedPayload = {
+  jobId: string;
+  projectId: string;
+  error: string;
 };

@@ -19,15 +19,20 @@ export type ElevenlabsTranscriptionResult = {
 @Injectable()
 export class ElevenlabsService {
   private readonly logger = new Logger(ElevenlabsService.name);
-  private readonly client: ElevenLabsClient;
+  private readonly client: ElevenLabsClient | null = null;
 
   constructor(private readonly configService: ConfigService) {
     const apiKey = this.configService.get<string>('ELEVENLABS_API_KEY');
-    if (!apiKey) {
-      throw new Error('ELEVENLABS_API_KEY is not defined');
+    if (apiKey) {
+      this.client = new ElevenLabsClient({ apiKey });
+    } else {
+      this.logger.debug('ELEVENLABS_API_KEY not configured — transcription disabled');
     }
+  }
 
-    this.client = new ElevenLabsClient({ apiKey });
+  private requireClient(): ElevenLabsClient {
+    if (!this.client) throw new Error('ELEVENLABS_API_KEY is not configured');
+    return this.client;
   }
 
   async transcribe({
@@ -43,7 +48,7 @@ export class ElevenlabsService {
 
     try {
       this.logger.debug(`Transcribing local file with ElevenLabs Scribe v2: ${input}`);
-      const response = await this.client.speechToText.convert({
+      const response = await this.requireClient().speechToText.convert({
         ...this.getScribeRequestBase(originalLanguage),
         file: {
           path: input,
@@ -75,7 +80,7 @@ export class ElevenlabsService {
     this.logger.log('Transcribing cloud URL with ElevenLabs Scribe v2...');
 
     try {
-      const response = await this.client.speechToText.convert({
+      const response = await this.requireClient().speechToText.convert({
         ...this.getScribeRequestBase(originalLanguage),
         cloudStorageUrl: url,
       });
@@ -102,7 +107,7 @@ export class ElevenlabsService {
     );
 
     try {
-      const response = await this.client.speechToText.convert({
+      const response = await this.requireClient().speechToText.convert({
         ...this.getScribeRequestBase(originalLanguage),
         file: {
           data: buffer,

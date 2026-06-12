@@ -1,40 +1,43 @@
 import type { Metadata } from 'next';
 import Script from "next/script";
-import localFont from 'next/font/local';
+import { Inter, Space_Grotesk } from 'next/font/google';
 import '../styles/globals.css';
 import Provider from './Provider';
 
-const poppins = localFont({
-  src: [
-    {
-      path: '../../node_modules/@fontsource/poppins/files/poppins-latin-400-normal.woff2',
-      weight: '400',
-      style: 'normal',
-    },
-    {
-      path: '../../node_modules/@fontsource/poppins/files/poppins-latin-500-normal.woff2',
-      weight: '500',
-      style: 'normal',
-    },
-    {
-      path: '../../node_modules/@fontsource/poppins/files/poppins-latin-600-normal.woff2',
-      weight: '600',
-      style: 'normal',
-    },
-    {
-      path: '../../node_modules/@fontsource/poppins/files/poppins-latin-700-normal.woff2',
-      weight: '700',
-      style: 'normal',
-    },
-  ],
-  variable: '--font-poppins',
+const inter = Inter({
+  subsets: ['latin'],
+  weight: ['400', '500', '600'],
+  variable: '--font-inter',
+  display: 'swap',
+});
+
+const spaceGrotesk = Space_Grotesk({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-space-grotesk',
   display: 'swap',
 });
 
 export const metadata: Metadata = {
-  title: 'Framedeck',
+  title: 'Edith — Montage vidéo IA pour e-commerce',
   description:
-    'Framedeck is a video editor powered by AI. It allows you to edit videos with ease and create professional videos in no time.',
+    'Edith transforme vos vidéos produits, rushs UGC et vidéos concurrentes en créas publicitaires prêtes à tester sur TikTok, Reels, Shorts, Facebook Ads et WhatsApp.',
+  keywords: [
+    'montage vidéo IA',
+    'vidéo e-commerce',
+    'créa publicitaire',
+    'TikTok Ads',
+    'Facebook Ads',
+    'UGC',
+    'COD Afrique',
+    'SaaS e-commerce',
+  ],
+  openGraph: {
+    title: 'Edith — Montage vidéo IA pour e-commerce',
+    description:
+      'Produisez plus de vidéos publicitaires en moins de temps avec Edith.',
+    type: 'website',
+  },
   icons: {
     icon: '/icon.svg',
   },
@@ -62,7 +65,7 @@ export default function RootLayout({
           />
         )}
       </head>
-      <body className={`${poppins.variable} antialiased`}>
+      <body className={`${inter.variable} ${spaceGrotesk.variable} antialiased`}>
         <Provider>{children}</Provider>
       </body>
     </html>
