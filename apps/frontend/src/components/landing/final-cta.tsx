@@ -3,9 +3,13 @@
 import { motion } from 'motion/react';
 import { CheckCircle2, Heart } from 'lucide-react';
 import { Container } from '@/components/shared/container';
+import { ShimmerButton } from '@/components/ui/shimmer-button';
 import { fadeUp, staggerContainer } from '@/lib/motion';
+import { useT } from '@/i18n/locale-context';
 
-export const FinalCta: React.FC = () => (
+export const FinalCta: React.FC = () => {
+  const t = useT();
+  return (
   <section className="relative overflow-hidden bg-edith-bg py-24 sm:py-32">
     {/* Bottom green glow */}
     <div
@@ -41,17 +45,17 @@ export const FinalCta: React.FC = () => (
             variants={fadeUp}
             className="text-5xl font-semibold leading-[1.05] tracking-tight text-white sm:text-6xl lg:text-[64px] lg:leading-[1.05]"
           >
-            Lancez votre essai gratuit de 7 jours
+            {t('finalCta.title')}
           </motion.h2>
 
           <motion.div variants={fadeUp} className="flex flex-wrap items-center gap-x-8 gap-y-3">
             <div className="flex items-center gap-2">
               <CheckCircle2 className="size-5 text-edith-accent" strokeWidth={1.5} />
-              <span className="text-[15px] text-white/80">Essai 7 jours gratuit</span>
+              <span className="text-[15px] text-white/80">{t('finalCta.free')}</span>
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle2 className="size-5 text-edith-accent" strokeWidth={1.5} />
-              <span className="text-[15px] text-white/80">Sans carte bancaire</span>
+              <span className="text-[15px] text-white/80">{t('finalCta.noCard')}</span>
             </div>
           </motion.div>
         </div>
@@ -68,19 +72,29 @@ export const FinalCta: React.FC = () => (
           </div>
 
           <div className="flex items-center gap-6">
-            <a
-              href="/login"
-              className="inline-flex items-center rounded-full bg-edith-accent px-7 py-3.5 text-[15px] font-semibold text-edith-bg shadow-[0_0_40px_rgba(81,224,207,0.25)] transition-all duration-200 hover:bg-edith-accent-light hover:shadow-[0_0_60px_rgba(81,224,207,0.4)]"
+            <ShimmerButton
+              onClick={() => { window.location.href = '/login'; }}
+              background="#51e0cf"
+              shimmerColor="rgba(255,255,255,0.95)"
+              shimmerDuration="2.6s"
+              borderRadius="54px"
+              className="px-7 py-3.5 text-[15px]"
+              style={{
+                fontFamily: 'var(--font-space-grotesk), sans-serif',
+                letterSpacing: '-0.02em',
+                boxShadow: '0 0 40px rgba(81,224,207,0.25)',
+              }}
             >
-              Commencer
-            </a>
+              {t('finalCta.cta')}
+            </ShimmerButton>
             <div className="flex flex-col">
               <p className="text-[15px] font-semibold text-white">4.80/5</p>
-              <p className="text-[13px] text-white/40">Sur 300+ retours utilisateurs</p>
+              <p className="text-[13px] text-white/40">{t('finalCta.rating')}</p>
             </div>
           </div>
         </motion.div>
       </motion.div>
     </Container>
   </section>
-);
+  );
+};

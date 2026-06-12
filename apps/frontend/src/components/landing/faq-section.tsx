@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Sparkles } from 'lucide-react';
 import { FAQ_ITEMS } from '@/lib/constants';
 import { fadeUp, staggerContainer, VERVE_EASE } from '@/lib/motion';
+import { useT } from '@/i18n/locale-context';
 
 /* ---------- FAQ icon (custom rotating + ↔ ×) ---------- */
 
@@ -243,7 +244,9 @@ const FaqItem: React.FC<{ question: string; answer: string }> = ({ question, ans
 
 /* ---------- Section — Verve HTML structure exactly ---------- */
 
-export const FaqSection: React.FC = () => (
+export const FaqSection: React.FC = () => {
+  const t = useT();
+  return (
   <section
     id="faq"
     className="section-faq"
@@ -307,7 +310,7 @@ export const FaqSection: React.FC = () => (
               }}
             >
               <Sparkles className="size-5 text-edith-accent" strokeWidth={1.5} />
-              Edith Product Overview
+              {t('faq.badge')}
             </span>
           </motion.div>
 
@@ -333,7 +336,7 @@ export const FaqSection: React.FC = () => (
                   display: 'inline-block',
                 }}
               >
-                Questions fréquentes
+                {t('faq.title')}
               </span>
             </h2>
             <p
@@ -346,8 +349,8 @@ export const FaqSection: React.FC = () => (
                 color: '#ffffffb8',
               }}
             >
-              Pour toute autre question, n'hésitez pas à{' '}
-              <span style={{ color: '#ffffff' }}>contacter notre équipe.</span>
+              {t('faq.subtitle')}{' '}
+              <span style={{ color: '#ffffff' }}>{t('faq.reachOut')}</span>
             </p>
           </motion.div>
         </motion.div>
@@ -362,8 +365,8 @@ export const FaqSection: React.FC = () => (
           style={{ width: '100%', maxWidth: '560px' }}
         >
           {FAQ_ITEMS.map((item) => (
-            <motion.div key={item.question} variants={fadeUp}>
-              <FaqItem question={item.question} answer={item.answer} />
+            <motion.div key={item.questionKey} variants={fadeUp}>
+              <FaqItem question={t(item.questionKey)} answer={t(item.answerKey)} />
             </motion.div>
           ))}
         </motion.div>
@@ -432,4 +435,5 @@ export const FaqSection: React.FC = () => (
       </div>
     </div>
   </section>
-);
+  );
+};

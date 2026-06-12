@@ -3,6 +3,7 @@ import Script from "next/script";
 import { Inter, Space_Grotesk } from 'next/font/google';
 import '../styles/globals.css';
 import Provider from './Provider';
+import { LocaleProvider } from '@/i18n/locale-context';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -49,7 +50,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
+    <html lang="fr" className="dark">
       <head>
         {process.env.NODE_ENV === "development" && (
           <Script
@@ -66,7 +67,9 @@ export default function RootLayout({
         )}
       </head>
       <body className={`${inter.variable} ${spaceGrotesk.variable} antialiased`}>
-        <Provider>{children}</Provider>
+        <LocaleProvider>
+          <Provider>{children}</Provider>
+        </LocaleProvider>
       </body>
     </html>
   );

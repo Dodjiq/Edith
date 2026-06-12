@@ -5,16 +5,72 @@ import { Menu, X } from 'lucide-react';
 import { useUiStore } from '@/store/ui-store';
 import { Button } from '@/components/buttons/button';
 import { EdithGirlIcon } from '@/components/shared/edith-girl-icon';
+import { useLocale } from '@/i18n/locale-context';
+import type { Locale, TranslationKey } from '@/i18n/translations';
 
-const NAV_LINKS = [
-  { label: 'À propos', href: '#features' },
-  { label: 'Intégrations', href: '#integrations' },
-  { label: 'Tarifs', href: '#pricing' },
-  { label: 'Blog', href: '#blog' },
-] as const;
+const NAV_LINKS: ReadonlyArray<{ key: TranslationKey; href: string }> = [
+  { key: 'nav.about', href: '#features' },
+  { key: 'nav.integrations', href: '#integrations' },
+  { key: 'nav.pricing', href: '#pricing' },
+  { key: 'nav.blog', href: '#blog' },
+];
+
+const LanguageSwitcher: React.FC<{ value: Locale; onChange: (l: Locale) => void }> = ({ value, onChange }) => (
+  <div
+    role="group"
+    aria-label="Langue"
+    className="relative inline-flex items-center"
+    style={{
+      padding: '3px',
+      borderRadius: '99px',
+      border: '1px solid rgba(255,255,255,0.1)',
+      backgroundColor: 'rgba(255,255,255,0.03)',
+    }}
+  >
+    {(['fr', 'en'] as const).map((locale) => {
+      const isActive = value === locale;
+      return (
+        <button
+          key={locale}
+          type="button"
+          onClick={() => onChange(locale)}
+          aria-pressed={isActive}
+          className="relative"
+          style={{
+            padding: '5px 12px',
+            fontFamily: 'var(--font-space-grotesk), sans-serif',
+            fontSize: '12px',
+            fontWeight: 600,
+            letterSpacing: '0.04em',
+            textTransform: 'uppercase',
+            color: isActive ? '#0a0f0f' : 'rgba(255,255,255,0.55)',
+            borderRadius: '99px',
+            transition: 'color 0.3s cubic-bezier(0.6, 0.6, 0, 1)',
+            zIndex: 1,
+          }}
+        >
+          {locale}
+          {isActive && (
+            <motion.span
+              layoutId="locale-pill"
+              className="absolute inset-0"
+              style={{
+                borderRadius: '99px',
+                backgroundColor: '#ffffff',
+                zIndex: -1,
+              }}
+              transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+            />
+          )}
+        </button>
+      );
+    })}
+  </div>
+);
 
 export const Navbar: React.FC = () => {
   const { mobileMenuOpen, setMobileMenuOpen } = useUiStore();
+  const { locale, setLocale, t } = useLocale();
 
   return (
     <>
@@ -76,7 +132,7 @@ export const Navbar: React.FC = () => {
                   e.currentTarget.style.borderColor = 'transparent';
                 }}
               >
-                {link.label}
+                {t(link.key)}
               </a>
             ))}
           </nav>
@@ -84,15 +140,18 @@ export const Navbar: React.FC = () => {
           {/* nav-right: flex: 1, justify-end */}
           <div
             className="flex items-center"
-            style={{ flex: 1, justifyContent: 'flex-end' }}
+            style={{ flex: 1, justifyContent: 'flex-end', gap: '12px' }}
           >
+            <div className="hidden md:inline-flex">
+              <LanguageSwitcher value={locale} onChange={setLocale} />
+            </div>
             <Button
               asChild
               variant="ghost"
               size="sm"
               className="hidden rounded-full border border-white/10 bg-white/[0.03] px-4 text-white hover:border-white/20 hover:bg-white/[0.08] hover:text-white md:inline-flex"
             >
-              <a href="/login">Se connecter</a>
+              <a href="/login">{t('nav.signIn')}</a>
             </Button>
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -123,15 +182,18 @@ export const Navbar: React.FC = () => {
                     onClick={() => setMobileMenuOpen(false)}
                     className="rounded-lg px-3 py-2.5 text-sm text-white/70 transition-colors hover:bg-white/5 hover:text-white"
                   >
-                    {link.label}
+                    {t(link.key)}
                   </a>
                 ))}
+                <div className="mt-3 flex items-center justify-center pb-2">
+                  <LanguageSwitcher value={locale} onChange={setLocale} />
+                </div>
                 <a
                   href="/login"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="mt-3 block w-full rounded-full bg-edith-accent py-3 text-center text-sm font-semibold text-edith-neutral-100"
+                  className="mt-1 block w-full rounded-full bg-edith-accent py-3 text-center text-sm font-semibold text-edith-neutral-100"
                 >
-                  Se connecter
+                  {t('nav.signIn')}
                 </a>
               </div>
             </div>

@@ -133,72 +133,69 @@ export const INTEGRATIONS = [
 
 export const PRICING_PLANS = [
   {
-    id: 'starter' as const,
-    name: 'Starter',
+    id: 'basic' as const,
+    nameKey: 'pricing.basic.name',
+    descKey: 'pricing.basic.desc',
+    ctaKey: 'pricing.basic.cta',
     price: { monthly: 0, annual: 0 },
-    description: 'Pour tester Edith sur quelques vidéos.',
-    features: [
-      '3 exports vidéo',
-      'Sous-titres automatiques',
-      'Format TikTok / Reels',
-      'Watermark Edith',
-    ],
-    cta: 'Tester gratuitement',
     popular: false,
+    featureKeys: [
+      'pricing.basic.f1',
+      'pricing.basic.f2',
+      'pricing.basic.f3',
+      'pricing.basic.f4',
+      'pricing.basic.f5',
+      'pricing.basic.f6',
+      'pricing.basic.f7',
+      'pricing.basic.f8',
+    ],
   },
   {
-    id: 'growth' as const,
-    name: 'Growth',
-    price: { monthly: 19, annual: 190 },
-    description: 'Pour e-commerçants qui veulent faire du volume.',
-    features: [
-      '30 exports vidéo par mois',
-      'Hooks et angles IA',
-      'Exports sans watermark',
-      'Variantes A/B rapides',
-      'Priorité rendu standard',
-    ],
-    cta: 'Démarrer Growth',
+    id: 'pro' as const,
+    nameKey: 'pricing.pro.name',
+    descKey: 'pricing.pro.desc',
+    ctaKey: 'pricing.pro.cta',
+    price: { monthly: 19.99, annual: 167.92 },
     popular: true,
+    featureKeys: [
+      'pricing.pro.f1',
+      'pricing.pro.f2',
+      'pricing.pro.f3',
+      'pricing.pro.f4',
+      'pricing.pro.f5',
+      'pricing.pro.f6',
+      'pricing.pro.f7',
+      'pricing.pro.f8',
+      'pricing.pro.f9',
+    ],
   },
   {
-    id: 'agency' as const,
-    name: 'Agency',
-    price: { monthly: 49, annual: 490 },
-    description: 'Pour agences, équipes et gros volumes.',
-    features: [
-      '100 exports vidéo par mois',
-      'Workspaces clients',
-      'Templates créatifs avancés',
-      'Support prioritaire',
-      'Accès bêta aux nouvelles fonctions',
-    ],
-    cta: 'Contacter Sales',
+    id: 'premium' as const,
+    nameKey: 'pricing.premium.name',
+    descKey: 'pricing.premium.desc',
+    ctaKey: 'pricing.premium.cta',
+    price: { monthly: 29.99, annual: 251.92 },
     popular: false,
+    featureKeys: [
+      'pricing.premium.f1',
+      'pricing.premium.f2',
+      'pricing.premium.f3',
+      'pricing.premium.f4',
+      'pricing.premium.f5',
+      'pricing.premium.f6',
+      'pricing.premium.f7',
+      'pricing.premium.f8',
+      'pricing.premium.f9',
+      'pricing.premium.f10',
+    ],
   },
 ] as const;
 
 export const FAQ_ITEMS = [
-  {
-    question: 'Je dois avoir des compétences en montage ?',
-    answer:
-      "Non. Vous importez vos vidéos, vous décrivez le résultat voulu, et Edith génère la créa en moins de 2 minutes. Aucun logiciel de montage nécessaire.",
-  },
-  {
-    question: "Est-ce que je peux générer plusieurs variantes ?",
-    answer:
-      "Oui. C'est l'objectif principal : créer plusieurs versions avec différents hooks, rythmes et angles pour identifier rapidement ce qui convertit.",
-  },
-  {
-    question: 'Quels formats sont disponibles ?',
-    answer:
-      "9:16 pour TikTok, Reels et Shorts. 1:1 pour Meta Ads. 16:9 pour YouTube. Tous générés en une seule session.",
-  },
-  {
-    question: "Est-ce adapté au marché africain et COD ?",
-    answer:
-      "Oui. Edith est pensé pour les workflows COD, WhatsApp, UGC local et publicités rapides pour Togo, Côte d'Ivoire, Sénégal et autres marchés.",
-  },
+  { questionKey: 'faq.q1', answerKey: 'faq.a1' },
+  { questionKey: 'faq.q2', answerKey: 'faq.a2' },
+  { questionKey: 'faq.q3', answerKey: 'faq.a3' },
+  { questionKey: 'faq.q4', answerKey: 'faq.a4' },
 ] as const;
 
 export const TESTIMONIALS = [

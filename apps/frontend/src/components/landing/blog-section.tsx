@@ -3,6 +3,8 @@
 import { motion } from 'motion/react';
 import { Sparkles } from 'lucide-react';
 import { fadeUp, staggerContainer } from '@/lib/motion';
+import { useT } from '@/i18n/locale-context';
+import type { TranslationKey } from '@/i18n/translations';
 
 /* ---------- Isometric SVG illustrations (one per article) ---------- */
 
@@ -174,35 +176,32 @@ const IllustrationGrowth: React.FC = () => (
 /* ---------- Articles ---------- */
 
 type Article = {
-  category: string;
-  title: string;
-  excerpt: string;
+  categoryKey: TranslationKey;
+  titleKey: TranslationKey;
+  excerptKey: TranslationKey;
   illustration: React.ReactNode;
   bgGradient: string;
 };
 
 const ARTICLES: Article[] = [
   {
-    category: 'Creative Strategy',
-    title: 'Comment structurer un hook qui retient l\'attention',
-    excerpt:
-      'Les premières secondes décident souvent si votre vidéo sera regardée ou ignorée. Voici la méthode des 4 ancrages narratifs.',
+    categoryKey: 'blog.article1.category',
+    titleKey: 'blog.article1.title',
+    excerptKey: 'blog.article1.excerpt',
     illustration: <IllustrationCreative />,
     bgGradient: 'linear-gradient(135deg, #1e1b4b 0%, #0a0a0a 100%)',
   },
   {
-    category: 'Edith Product',
-    title: 'Construire ses pages de vente avec Edith',
-    excerpt:
-      'Utilisez l\'IA d\'Edith pour générer rapidement des vidéos d\'accompagnement pour vos pages de vente Shopify.',
+    categoryKey: 'blog.article2.category',
+    titleKey: 'blog.article2.title',
+    excerptKey: 'blog.article2.excerpt',
     illustration: <IllustrationProduct />,
     bgGradient: 'linear-gradient(135deg, #064e3b 0%, #0a0a0a 100%)',
   },
   {
-    category: 'Growth E-commerce',
-    title: 'Adapter ses créas au COD et WhatsApp',
-    excerpt:
-      'Comment orienter vos vidéos vers une action claire : message, appel ou commande. Le playbook complet.',
+    categoryKey: 'blog.article3.category',
+    titleKey: 'blog.article3.title',
+    excerptKey: 'blog.article3.excerpt',
     illustration: <IllustrationGrowth />,
     bgGradient: 'linear-gradient(135deg, #451a03 0%, #0a0a0a 100%)',
   },
@@ -210,7 +209,9 @@ const ARTICLES: Article[] = [
 
 /* ---------- Section ---------- */
 
-export const BlogSection: React.FC = () => (
+export const BlogSection: React.FC = () => {
+  const t = useT();
+  return (
   <section id="blog" className="bg-edith-bg" style={{ padding: '120px 5%' }}>
     <div style={{ width: '100%', maxWidth: '1216px', margin: '0 auto' }}>
       {/* top-row: badge + title left, description right (mb 80px) */}
@@ -244,7 +245,7 @@ export const BlogSection: React.FC = () => (
               }}
             >
               <Sparkles className="size-5 text-edith-accent" strokeWidth={1.5} />
-              Edith Product Overview
+              {t('blog.badge')}
             </span>
           </motion.div>
 
@@ -262,7 +263,7 @@ export const BlogSection: React.FC = () => (
               backgroundClip: 'text',
             }}
           >
-            Blog & Articles
+            {t('blog.title')}
           </motion.h2>
         </div>
 
@@ -276,8 +277,7 @@ export const BlogSection: React.FC = () => (
             maxWidth: '480px',
           }}
         >
-          Stratégies créatives, retours d'expérience et tactiques de growth pour
-          produire des publicités vidéo qui convertissent en 2026.
+          {t('blog.subtitle')}
         </motion.p>
       </motion.div>
 
@@ -292,7 +292,7 @@ export const BlogSection: React.FC = () => (
       >
         {ARTICLES.map((article) => (
           <motion.a
-            key={article.title}
+            key={article.titleKey}
             href="#"
             variants={fadeUp}
             className="group flex flex-col cursor-pointer"
@@ -326,7 +326,7 @@ export const BlogSection: React.FC = () => (
                   color: '#ffffff66',
                 }}
               >
-                {article.category}
+                {t(article.categoryKey)}
               </div>
 
               {/* h5: title */}
@@ -342,7 +342,7 @@ export const BlogSection: React.FC = () => (
                   transition: 'color 0.3s cubic-bezier(0.6, 0.6, 0, 1)',
                 }}
               >
-                {article.title}
+                {t(article.titleKey)}
               </h5>
 
               {/* paragraph-small */}
@@ -355,7 +355,7 @@ export const BlogSection: React.FC = () => (
                   margin: 0,
                 }}
               >
-                {article.excerpt}
+                {t(article.excerptKey)}
               </p>
             </div>
           </motion.a>
@@ -363,4 +363,5 @@ export const BlogSection: React.FC = () => (
       </motion.div>
     </div>
   </section>
-);
+  );
+};

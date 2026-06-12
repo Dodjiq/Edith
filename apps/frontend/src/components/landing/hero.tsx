@@ -4,7 +4,9 @@ import { motion } from 'motion/react';
 import { Sparkles } from 'lucide-react';
 import { Container } from '@/components/shared/container';
 import { VideoDemo } from '@/components/landing/video-demo';
+import { ShimmerButton } from '@/components/ui/shimmer-button';
 import { fadeUp, tiltIn, pillarGrow, staggerContainer, VERVE_EASE } from '@/lib/motion';
+import { useT } from '@/i18n/locale-context';
 
 const HeroPillars: React.FC = () => (
   <div
@@ -48,7 +50,9 @@ const HeroPillars: React.FC = () => (
   </div>
 );
 
-export const Hero: React.FC = () => (
+export const Hero: React.FC = () => {
+  const t = useT();
+  return (
   <section id="hero" className="relative overflow-hidden bg-edith-bg pt-32">
     {/* 4 vertical column pillars (Verve exact) */}
     <HeroPillars />
@@ -94,7 +98,7 @@ export const Hero: React.FC = () => (
             }}
           >
             <Sparkles className="size-5 text-edith-accent" strokeWidth={1.5} />
-            Edith Product Overview
+            {t('hero.badge')}
           </span>
         </motion.div>
 
@@ -115,7 +119,7 @@ export const Hero: React.FC = () => (
             marginTop: '20px',
           }}
         >
-          Produisez des créas publicitaires de qualité en quelques minutes
+          {t('hero.title')}
         </motion.h1>
 
         {/* Subtitle */}
@@ -130,37 +134,26 @@ export const Hero: React.FC = () => (
             marginTop: '8px',
           }}
         >
-          Importez vos rushs, décrivez le résultat voulu. Edith génère
-          plusieurs variantes prêtes à publier sur TikTok, Reels et Meta Ads.
+          {t('hero.subtitle')}
         </motion.p>
 
-        {/* Button-primary */}
+        {/* Button-primary — ShimmerButton */}
         <motion.div variants={fadeUp} style={{ marginTop: '24px' }}>
-          <a
-            href="/login"
-            className="inline-flex items-center"
+          <ShimmerButton
+            onClick={() => { window.location.href = '/login'; }}
+            background="#51e0cf"
+            shimmerColor="rgba(255,255,255,0.95)"
+            shimmerDuration="2.6s"
+            borderRadius="54px"
+            className="px-7 py-3.5 text-[15px]"
             style={{
-              backgroundColor: '#51e0cf',
-              color: '#0a0f0f',
-              borderRadius: '54px',
-              padding: '12px 24px',
               fontFamily: 'var(--font-space-grotesk), sans-serif',
-              fontSize: '14px',
-              fontWeight: 500,
-              lineHeight: '24px',
               letterSpacing: '-0.02em',
-              gap: '8px',
-              transition: 'background-color 0.3s cubic-bezier(0.6, 0.6, 0, 1)',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#6deddc';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = '#51e0cf';
+              boxShadow: '0 0 40px rgba(81,224,207,0.25)',
             }}
           >
-            Commencer gratuitement
-          </a>
+            {t('hero.cta')}
+          </ShimmerButton>
         </motion.div>
 
         {/* Video demo with 3D tilt entry */}
@@ -179,4 +172,5 @@ export const Hero: React.FC = () => (
       </motion.div>
     </Container>
   </section>
-);
+  );
+};

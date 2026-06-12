@@ -13,48 +13,114 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { fadeUp, staggerContainer, VERVE_EASE } from '@/lib/motion';
+import { useT } from '@/i18n/locale-context';
+import type { TranslationKey } from '@/i18n/translations';
 
 /* ---------- Visuals (one per card) ---------- */
 
 const RadarVisual: React.FC = () => (
-  <div className="relative flex h-full min-h-[360px] items-center justify-center">
-    <div className="absolute" style={{ width: '320px', height: '320px', borderRadius: '99px', border: '1px solid rgba(255,255,255,0.08)' }} />
-    <div className="absolute" style={{ width: '220px', height: '220px', borderRadius: '99px', border: '1px solid rgba(255,255,255,0.1)' }} />
-    <div className="absolute" style={{ width: '120px', height: '120px', borderRadius: '99px', border: '1px solid rgba(255,255,255,0.12)' }} />
+  <div className="relative flex h-full min-h-[360px] items-center justify-center overflow-hidden">
+    {/* Concentric circles — radar ping outward */}
+    {[
+      { size: 320, delay: 0 },
+      { size: 220, delay: 0.9 },
+      { size: 120, delay: 1.8 },
+    ].map(({ size, delay }, i) => (
+      <motion.div
+        key={i}
+        className="absolute"
+        style={{
+          width: `${size}px`,
+          height: `${size}px`,
+          borderRadius: '99px',
+          border: `1px solid rgba(255,255,255,${0.08 + i * 0.02})`,
+        }}
+        animate={{ scale: [1, 1.04, 1], opacity: [1, 0.6, 1] }}
+        transition={{ duration: 2.7, ease: 'easeInOut', repeat: Infinity, delay }}
+      />
+    ))}
+
+    {/* Radar sweep — rotating conic gradient */}
+    <motion.div
+      aria-hidden="true"
+      className="absolute pointer-events-none"
+      style={{
+        width: '320px',
+        height: '320px',
+        borderRadius: '99px',
+        background:
+          'conic-gradient(from 0deg, transparent 0deg, transparent 320deg, rgba(81,224,207,0.18) 350deg, rgba(81,224,207,0.35) 360deg)',
+        maskImage: 'radial-gradient(circle, black 30%, transparent 70%)',
+        WebkitMaskImage: 'radial-gradient(circle, black 30%, transparent 70%)',
+      }}
+      animate={{ rotate: 360 }}
+      transition={{ duration: 6, ease: 'linear', repeat: Infinity }}
+    />
+
+    {/* Center dot — pulsing mint */}
     <div
-      className="relative flex items-center justify-center"
-      style={{ width: '64px', height: '64px', borderRadius: '99px', backgroundColor: '#0a0a0a', border: '1px solid rgba(255,255,255,0.1)' }}
+      className="relative flex items-center justify-center z-10"
+      style={{
+        width: '64px',
+        height: '64px',
+        borderRadius: '99px',
+        backgroundColor: '#0a0a0a',
+        border: '1px solid rgba(255,255,255,0.1)',
+      }}
     >
-      <div style={{ width: '28px', height: '28px', borderRadius: '99px', backgroundColor: 'rgba(81,224,207,0.8)' }} />
+      <motion.div
+        style={{ width: '28px', height: '28px', borderRadius: '99px', backgroundColor: 'rgba(81,224,207,0.8)' }}
+        animate={{ scale: [1, 1.12, 1], boxShadow: ['0 0 0 rgba(81,224,207,0)', '0 0 24px rgba(81,224,207,0.6)', '0 0 0 rgba(81,224,207,0)'] }}
+        transition={{ duration: 2, ease: 'easeInOut', repeat: Infinity }}
+      />
     </div>
-    {/* Labels with avatars */}
-    <div className="absolute" style={{ left: '20%', top: '38%' }}>
-      <div className="flex items-center" style={{ gap: '8px' }}>
-        <span style={{ padding: '4px 10px', borderRadius: '6px', backgroundColor: 'rgba(255,255,255,0.08)', fontSize: '11px', color: 'rgba(255,255,255,0.85)' }}>tsbekkers</span>
-        <div style={{ width: '14px', height: '14px', transform: 'rotate(45deg)', backgroundColor: '#e5b364' }} />
-      </div>
-    </div>
-    <div className="absolute" style={{ right: '20%', top: '24%' }}>
-      <div className="flex items-center" style={{ gap: '8px' }}>
-        <div style={{ width: '14px', height: '14px', transform: 'rotate(-12deg)', backgroundColor: '#a78bfa' }} />
-        <span style={{ padding: '4px 10px', borderRadius: '6px', backgroundColor: 'rgba(255,255,255,0.08)', fontSize: '11px', color: 'rgba(255,255,255,0.85)' }}>Hen3</span>
-      </div>
-    </div>
-    <div className="absolute" style={{ right: '24%', bottom: '24%' }}>
-      <div className="flex items-center" style={{ gap: '8px' }}>
-        <div style={{ width: '14px', height: '14px', transform: 'rotate(90deg)', backgroundColor: '#e05151' }} />
-        <span style={{ padding: '4px 10px', borderRadius: '6px', backgroundColor: 'rgba(255,255,255,0.08)', fontSize: '11px', color: 'rgba(255,255,255,0.85)' }}>batukarax</span>
-      </div>
-    </div>
-    {/* Legend */}
+
+    {/* Avatar markers with float */}
+    {[
+      { side: 'left', pos: { left: '20%', top: '38%' }, name: 'tsbekkers', color: '#e5b364', shape: 'rotate(45deg)', delay: 0, dir: 'left' as const },
+      { side: 'right', pos: { right: '20%', top: '24%' }, name: 'Hen3', color: '#a78bfa', shape: 'rotate(-12deg)', delay: 0.6, dir: 'right' as const },
+      { side: 'right', pos: { right: '24%', bottom: '24%' }, name: 'batukarax', color: '#e05151', shape: 'rotate(90deg)', delay: 1.2, dir: 'right' as const },
+    ].map((m) => (
+      <motion.div
+        key={m.name}
+        className="absolute"
+        style={m.pos}
+        animate={{ y: [0, -5, 0] }}
+        transition={{ duration: 3.4, ease: 'easeInOut', repeat: Infinity, delay: m.delay }}
+      >
+        <div className="flex items-center" style={{ gap: '8px' }}>
+          {m.dir === 'left' && (
+            <span style={{ padding: '4px 10px', borderRadius: '6px', backgroundColor: 'rgba(255,255,255,0.08)', fontSize: '11px', color: 'rgba(255,255,255,0.85)' }}>
+              {m.name}
+            </span>
+          )}
+          <motion.div
+            style={{ width: '14px', height: '14px', transform: m.shape, backgroundColor: m.color }}
+            animate={{ boxShadow: ['0 0 0 rgba(0,0,0,0)', `0 0 12px ${m.color}aa`, '0 0 0 rgba(0,0,0,0)'] }}
+            transition={{ duration: 2, ease: 'easeInOut', repeat: Infinity, delay: m.delay }}
+          />
+          {m.dir === 'right' && (
+            <span style={{ padding: '4px 10px', borderRadius: '6px', backgroundColor: 'rgba(255,255,255,0.08)', fontSize: '11px', color: 'rgba(255,255,255,0.85)' }}>
+              {m.name}
+            </span>
+          )}
+        </div>
+      </motion.div>
+    ))}
+
+    {/* Legend — pulsing dots */}
     <div className="absolute" style={{ right: '24px', bottom: '24px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
       {[
-        { color: '#a78bfa', value: '12%' },
-        { color: '#e05151', value: '84%' },
-        { color: '#e5b364', value: '99%' },
+        { color: '#a78bfa', value: '12%', delay: 0 },
+        { color: '#e05151', value: '84%', delay: 0.4 },
+        { color: '#e5b364', value: '99%', delay: 0.8 },
       ].map((item) => (
         <div key={item.value} className="flex items-center" style={{ gap: '8px', padding: '4px 10px', borderRadius: '8px', backgroundColor: 'rgba(255,255,255,0.05)' }}>
-          <div style={{ width: '8px', height: '8px', borderRadius: '99px', backgroundColor: item.color }} />
+          <motion.div
+            style={{ width: '8px', height: '8px', borderRadius: '99px', backgroundColor: item.color }}
+            animate={{ opacity: [0.6, 1, 0.6], scale: [1, 1.3, 1] }}
+            transition={{ duration: 1.8, ease: 'easeInOut', repeat: Infinity, delay: item.delay }}
+          />
           <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.8)' }}>{item.value}</span>
         </div>
       ))}
@@ -62,56 +128,184 @@ const RadarVisual: React.FC = () => (
   </div>
 );
 
+const TIMELINE_ITEMS = [
+  { title: 'Prototyping & Testing', date: 'Mar 01 to Aug 01', color: '#e05151' },
+  { title: 'Design & Development', date: 'Jan 01 to June 01', color: '#e5b364' },
+  { title: 'Prototyping & Testing', date: 'Mar 01 to Aug 01', color: '#a78bfa' },
+];
+
 const TimelineVisual: React.FC = () => (
-  <div className="flex h-full min-h-[360px] flex-col items-center justify-center" style={{ gap: '12px', padding: '24px' }}>
-    {[
-      { title: 'Prototyping & Testing', date: 'Mar 01 to Aug 01', color: '#e05151' },
-      { title: 'Design & Development', date: 'Jan 01 to June 01', color: '#e5b364' },
-      { title: 'Prototyping & Testing', date: 'Mar 01 to Aug 01', color: '#a78bfa' },
-    ].map((item, i) => (
-      <div
+  <div className="relative flex h-full min-h-[360px] flex-col items-center justify-center" style={{ gap: '12px', padding: '24px' }}>
+    {/* Floating dot top-right */}
+    <motion.div
+      className="absolute"
+      style={{
+        right: '12%',
+        top: '14%',
+        width: '12px',
+        height: '12px',
+        borderRadius: '99px',
+        backgroundColor: 'rgba(255,255,255,0.15)',
+        border: '1px solid rgba(255,255,255,0.25)',
+      }}
+      animate={{ y: [0, -6, 0], opacity: [0.5, 1, 0.5] }}
+      transition={{ duration: 3.2, ease: 'easeInOut', repeat: Infinity }}
+    >
+      <motion.div
+        className="absolute inset-0 rounded-full"
+        style={{ border: '1px solid rgba(81,224,207,0.5)' }}
+        animate={{ scale: [1, 2.4, 2.4], opacity: [0.6, 0, 0] }}
+        transition={{ duration: 2.4, ease: 'easeOut', repeat: Infinity }}
+      />
+    </motion.div>
+
+    {TIMELINE_ITEMS.map((item, i) => (
+      <motion.div
         key={i}
-        className="flex items-center w-full max-w-sm"
+        className="flex items-center w-full max-w-sm relative"
         style={{
           gap: '12px',
           padding: '14px 16px',
           borderRadius: '12px',
           backgroundColor: 'rgba(255,255,255,0.025)',
           border: '1px solid rgba(255,255,255,0.06)',
+          overflow: 'hidden',
+        }}
+        animate={{
+          y: [0, -2, 0],
+          borderColor: [
+            'rgba(255,255,255,0.06)',
+            `${item.color}55`,
+            'rgba(255,255,255,0.06)',
+          ],
+          backgroundColor: [
+            'rgba(255,255,255,0.025)',
+            `${item.color}14`,
+            'rgba(255,255,255,0.025)',
+          ],
+          boxShadow: [
+            '0 0 0 rgba(0,0,0,0)',
+            `0 0 24px ${item.color}26`,
+            '0 0 0 rgba(0,0,0,0)',
+          ],
+        }}
+        transition={{
+          duration: 1.6,
+          ease: 'easeInOut',
+          repeat: Infinity,
+          repeatDelay: 3.2,
+          delay: i * 1.6,
         }}
       >
-        <div style={{ width: '3px', height: '36px', borderRadius: '4px', backgroundColor: item.color }} />
+        {/* Color bar with glow */}
+        <motion.div
+          style={{ width: '3px', height: '36px', borderRadius: '4px', backgroundColor: item.color }}
+          animate={{ boxShadow: ['0 0 0 rgba(0,0,0,0)', `0 0 12px ${item.color}cc`, '0 0 0 rgba(0,0,0,0)'] }}
+          transition={{
+            duration: 1.6,
+            ease: 'easeInOut',
+            repeat: Infinity,
+            repeatDelay: 3.2,
+            delay: i * 1.6,
+          }}
+        />
+
         <div className="flex-1">
           <p style={{ fontSize: '14px', fontWeight: 500, color: 'rgba(255,255,255,0.95)', letterSpacing: '-0.01em' }}>
             {item.title}
           </p>
           <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', marginTop: '2px' }}>{item.date}</p>
         </div>
-        <span style={{ color: 'rgba(255,255,255,0.4)' }}>⋮</span>
-      </div>
+
+        {/* Menu dots */}
+        <motion.span
+          style={{ color: 'rgba(255,255,255,0.4)' }}
+          animate={{ opacity: [0.4, 0.8, 0.4] }}
+          transition={{
+            duration: 1.6,
+            ease: 'easeInOut',
+            repeat: Infinity,
+            repeatDelay: 3.2,
+            delay: i * 1.6,
+          }}
+        >
+          ⋮
+        </motion.span>
+
+        {/* Active sweep — light bar crossing the active row */}
+        <motion.div
+          aria-hidden="true"
+          style={{
+            position: 'absolute',
+            top: 0,
+            bottom: 0,
+            width: '40%',
+            background: `linear-gradient(90deg, transparent, ${item.color}1f, transparent)`,
+            pointerEvents: 'none',
+          }}
+          animate={{ x: ['-100%', '250%'] }}
+          transition={{
+            duration: 1.6,
+            ease: 'easeInOut',
+            repeat: Infinity,
+            repeatDelay: 3.2,
+            delay: i * 1.6,
+          }}
+        />
+      </motion.div>
     ))}
   </div>
 );
 
+const CHIPS = [
+  { icon: CalendarIcon, label: 'Date', color: '#51e0cf' },
+  { icon: Mail, label: 'Mail', color: '#e05151' },
+  { icon: Shield, label: 'Console', color: '#a78bfa' },
+];
+
 const DashboardVisual: React.FC = () => (
   <div className="flex h-full min-h-[360px] items-center justify-center" style={{ padding: '24px' }}>
-    <div
-      className="w-full max-w-sm"
+    {/* Floating dot avatar — pulsing outside top-left */}
+    <motion.div
+      className="absolute"
+      style={{
+        left: '8%',
+        top: '22%',
+        width: '12px',
+        height: '12px',
+        borderRadius: '99px',
+        backgroundColor: 'rgba(255,255,255,0.15)',
+        border: '1px solid rgba(255,255,255,0.25)',
+      }}
+      animate={{ y: [0, -6, 0], opacity: [0.5, 1, 0.5] }}
+      transition={{ duration: 3, ease: 'easeInOut', repeat: Infinity }}
+    >
+      <motion.div
+        className="absolute inset-0 rounded-full"
+        style={{ border: '1px solid rgba(81,224,207,0.5)' }}
+        animate={{ scale: [1, 2.4, 2.4], opacity: [0.6, 0, 0] }}
+        transition={{ duration: 2.4, ease: 'easeOut', repeat: Infinity }}
+      />
+    </motion.div>
+
+    {/* Main card — subtle floating */}
+    <motion.div
+      className="relative w-full max-w-sm"
       style={{
         padding: '20px',
         borderRadius: '16px',
         backgroundColor: 'rgba(255,255,255,0.025)',
         border: '1px solid rgba(255,255,255,0.06)',
       }}
+      animate={{ y: [0, -4, 0] }}
+      transition={{ duration: 6, ease: 'easeInOut', repeat: Infinity }}
     >
       <p style={{ fontSize: '15px', fontWeight: 600, color: '#ffffff', marginBottom: '16px' }}>Dashboard</p>
+
+      {/* Chips — staggered active glow cycling between them */}
       <div className="flex" style={{ gap: '8px', marginBottom: '16px' }}>
-        {[
-          { icon: CalendarIcon, label: 'Date', color: '#51e0cf' },
-          { icon: Mail, label: 'Mail', color: '#e05151' },
-          { icon: Shield, label: 'Console', color: '#a78bfa' },
-        ].map(({ icon: Icon, label, color }) => (
-          <div
+        {CHIPS.map(({ icon: Icon, label, color }, i) => (
+          <motion.div
             key={label}
             className="flex items-center"
             style={{
@@ -121,35 +315,152 @@ const DashboardVisual: React.FC = () => (
               border: '1px solid rgba(255,255,255,0.1)',
               backgroundColor: 'rgba(255,255,255,0.04)',
             }}
+            animate={{
+              borderColor: ['rgba(255,255,255,0.1)', `${color}80`, 'rgba(255,255,255,0.1)'],
+              backgroundColor: [
+                'rgba(255,255,255,0.04)',
+                `${color}1a`,
+                'rgba(255,255,255,0.04)',
+              ],
+              boxShadow: [
+                '0 0 0 rgba(0,0,0,0)',
+                `0 0 16px ${color}40`,
+                '0 0 0 rgba(0,0,0,0)',
+              ],
+            }}
+            transition={{
+              duration: 1.4,
+              ease: 'easeInOut',
+              repeat: Infinity,
+              repeatDelay: 2.8,
+              delay: i * 1.4,
+            }}
           >
             <Icon className="size-3.5" style={{ color }} strokeWidth={1.5} />
             <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.85)' }}>{label}</span>
-          </div>
+          </motion.div>
         ))}
       </div>
+
+      {/* Import CSV panel */}
       <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '14px' }}>
-        <div
+        <motion.div
           style={{
             padding: '14px',
             borderRadius: '12px',
             border: '1px solid rgba(255,255,255,0.08)',
             backgroundColor: 'rgba(255,255,255,0.03)',
+            position: 'relative',
+            overflow: 'hidden',
           }}
+          animate={{
+            borderColor: [
+              'rgba(255,255,255,0.08)',
+              'rgba(81,224,207,0.25)',
+              'rgba(255,255,255,0.08)',
+            ],
+          }}
+          transition={{ duration: 3, ease: 'easeInOut', repeat: Infinity }}
         >
+          {/* Header with bouncing upload icon */}
           <div className="flex items-center" style={{ gap: '8px', marginBottom: '6px' }}>
-            <Upload className="size-4" style={{ color: 'rgba(255,255,255,0.5)' }} />
+            <motion.div
+              animate={{ y: [0, -3, 0] }}
+              transition={{ duration: 1.6, ease: 'easeInOut', repeat: Infinity }}
+            >
+              <Upload className="size-4" style={{ color: '#51e0cf' }} strokeWidth={1.8} />
+            </motion.div>
             <p style={{ fontSize: '14px', fontWeight: 600, color: '#ffffff' }}>Import CSV</p>
           </div>
           <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', marginBottom: '12px' }}>
             Lorem ipsum dolor sit amet, conse.
           </p>
+
+          {/* Animated loading bars */}
           <div className="flex flex-col" style={{ gap: '6px' }}>
-            <div style={{ height: '6px', borderRadius: '99px', backgroundColor: 'rgba(255,255,255,0.05)' }} />
-            <div style={{ height: '6px', borderRadius: '99px', backgroundColor: 'rgba(255,255,255,0.05)', width: '66%' }} />
+            {/* Bar 1 — fills 0 -> 100% on loop */}
+            <div
+              style={{
+                height: '6px',
+                borderRadius: '99px',
+                backgroundColor: 'rgba(255,255,255,0.05)',
+                overflow: 'hidden',
+                position: 'relative',
+              }}
+            >
+              <motion.div
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  borderRadius: '99px',
+                  background:
+                    'linear-gradient(90deg, #51e0cf 0%, #6deddc 50%, #51e0cf 100%)',
+                  transformOrigin: 'left center',
+                }}
+                animate={{ scaleX: [0, 1, 1] }}
+                transition={{
+                  duration: 3,
+                  times: [0, 0.7, 1],
+                  ease: 'easeInOut',
+                  repeat: Infinity,
+                }}
+              />
+            </div>
+            {/* Bar 2 — fills 0 -> 66% with delay */}
+            <div
+              style={{
+                height: '6px',
+                borderRadius: '99px',
+                backgroundColor: 'rgba(255,255,255,0.05)',
+                overflow: 'hidden',
+                position: 'relative',
+                width: '66%',
+              }}
+            >
+              <motion.div
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  borderRadius: '99px',
+                  background:
+                    'linear-gradient(90deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.6) 50%, rgba(255,255,255,0.4) 100%)',
+                  transformOrigin: 'left center',
+                }}
+                animate={{ scaleX: [0, 1, 1] }}
+                transition={{
+                  duration: 3,
+                  times: [0, 0.7, 1],
+                  ease: 'easeInOut',
+                  repeat: Infinity,
+                  delay: 0.3,
+                }}
+              />
+            </div>
           </div>
-        </div>
+
+          {/* Mint glow sweep on panel */}
+          <motion.div
+            aria-hidden="true"
+            style={{
+              position: 'absolute',
+              top: 0,
+              bottom: 0,
+              width: '40%',
+              background:
+                'linear-gradient(90deg, transparent, rgba(81,224,207,0.08), transparent)',
+              pointerEvents: 'none',
+            }}
+            animate={{ x: ['-100%', '250%'] }}
+            transition={{
+              duration: 3,
+              ease: 'easeInOut',
+              repeat: Infinity,
+              repeatDelay: 1.5,
+            }}
+          />
+        </motion.div>
       </div>
-    </div>
+    </motion.div>
   </div>
 );
 
@@ -158,8 +469,8 @@ const DashboardVisual: React.FC = () => (
 type FeatureCard = {
   number: string;
   icon: LucideIcon;
-  title: string;
-  description: string;
+  titleKey: TranslationKey;
+  descKey: TranslationKey;
   visual: React.ReactNode;
   reverse: boolean;
 };
@@ -168,27 +479,24 @@ const FEATURE_CARDS: FeatureCard[] = [
   {
     number: '01',
     icon: Boxes,
-    title: 'Exprimez vos idées comme un humain, pas comme une machine.',
-    description:
-      'Décrivez votre vision en langage naturel. Edith comprend les nuances de votre brief et structure le montage selon votre intention créative.',
+    titleKey: 'features.card1.title',
+    descKey: 'features.card1.desc',
     visual: <RadarVisual />,
     reverse: false,
   },
   {
     number: '02',
     icon: Layers,
-    title: 'Construisez votre montage bloc par bloc.',
-    description:
-      'Edith décompose votre vidéo en scènes intelligibles que vous pouvez réorganiser, remplacer ou modifier en un clic.',
+    titleKey: 'features.card2.title',
+    descKey: 'features.card2.desc',
     visual: <TimelineVisual />,
     reverse: true,
   },
   {
     number: '03',
     icon: Combine,
-    title: 'Pilotez tout depuis un dashboard unifié.',
-    description:
-      'Suivez vos exports, importez vos sources, surveillez vos performances. Tout votre workflow vidéo dans une interface claire.',
+    titleKey: 'features.card3.title',
+    descKey: 'features.card3.desc',
     visual: <DashboardVisual />,
     reverse: false,
   },
@@ -196,7 +504,9 @@ const FEATURE_CARDS: FeatureCard[] = [
 
 /* ---------- Section ---------- */
 
-export const FeaturesSection: React.FC = () => (
+export const FeaturesSection: React.FC = () => {
+  const t = useT();
+  return (
   <section id="features" className="bg-edith-bg" style={{ padding: '120px 5%' }}>
     <div style={{ width: '100%', maxWidth: '1216px', margin: '0 auto' }}>
       {/* top-row: title left + description right, mb 80px */}
@@ -230,7 +540,7 @@ export const FeaturesSection: React.FC = () => (
               }}
             >
               <Sparkles className="size-5 text-edith-accent" strokeWidth={1.5} />
-              Edith Product Overview
+              {t('hero.badge')}
             </span>
           </motion.div>
 
@@ -248,7 +558,7 @@ export const FeaturesSection: React.FC = () => (
               backgroundClip: 'text',
             }}
           >
-            Découvrez une solution simple de montage vidéo IA.
+            {t('features.title')}
           </motion.h2>
         </div>
 
@@ -262,9 +572,7 @@ export const FeaturesSection: React.FC = () => (
             maxWidth: '480px',
           }}
         >
-          Edith automatise les étapes répétitives du montage publicitaire pour
-          que vous puissiez vous concentrer sur ce qui compte vraiment : tester
-          vos angles et scaler ce qui convertit.
+          {t('features.subtitle')}
         </motion.p>
       </motion.div>
 
@@ -349,7 +657,7 @@ export const FeaturesSection: React.FC = () => (
                       maxWidth: '460px',
                     }}
                   >
-                    {card.title}
+                    {t(card.titleKey)}
                   </h3>
                   <p
                     style={{
@@ -360,7 +668,7 @@ export const FeaturesSection: React.FC = () => (
                       maxWidth: '460px',
                     }}
                   >
-                    {card.description}
+                    {t(card.descKey)}
                   </p>
                 </div>
               </div>
@@ -384,4 +692,5 @@ export const FeaturesSection: React.FC = () => (
       </motion.div>
     </div>
   </section>
-);
+  );
+};

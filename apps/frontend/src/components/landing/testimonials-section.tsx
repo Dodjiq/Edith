@@ -4,25 +4,34 @@ import { motion } from 'motion/react';
 import { Moon, Sparkles, Pencil } from 'lucide-react';
 import { Container } from '@/components/shared/container';
 import { fadeUp, staggerContainer, VERVE_EASE } from '@/lib/motion';
+import { useT } from '@/i18n/locale-context';
+import type { TranslationKey } from '@/i18n/translations';
 
-const STATS = [
+type StatItem = {
+  icon: typeof Moon;
+  iconColor: string;
+  value: string;
+  labelKey: TranslationKey;
+};
+
+const STATS: StatItem[] = [
   {
     icon: Moon,
     iconColor: 'text-amber-300',
     value: '10×',
-    label: 'plus rapide qu\'un montage manuel sur CapCut ou Premiere.',
+    labelKey: 'testimonials.stat1.label',
   },
   {
     icon: Sparkles,
     iconColor: 'text-rose-300',
     value: '95%',
-    label: 'du workflow géré sans logiciel de montage classique.',
+    labelKey: 'testimonials.stat2.label',
   },
   {
     icon: Pencil,
     iconColor: 'text-edith-accent',
     value: '22K+',
-    label: 'créas générées par les utilisateurs en bêta sur la plateforme.',
+    labelKey: 'testimonials.stat3.label',
   },
 ];
 
@@ -32,7 +41,7 @@ type Testimonial = {
   company: string;
   companyColor: string; // hex from Verve palette
   initials: string;
-  quote: string;
+  quoteKey: TranslationKey;
   time: string;
   date: string;
 };
@@ -43,18 +52,20 @@ const COMPANY_RED = '#e05151';    // --punane--100
 const COMPANY_ORANGE = '#e5b364'; // --oranz--100
 
 const TESTIMONIALS: Testimonial[] = [
-  { name: 'Sarah Leeman', role: 'Marketing Leader', company: '@Mailchimp', companyColor: COMPANY_GREEN, initials: 'SL', quote: 'Edith m\'a permis de tester 20 angles publicitaires en une heure. Game changer absolu.', time: '3:45 PM', date: 'Jun 20, 2025' },
-  { name: 'Amaya Locosta', role: 'Media Buyer', company: '@Klaviyo', companyColor: COMPANY_RED, initials: 'AL', quote: 'Sortir une créa TikTok en 2 minutes, je n\'y croyais pas avant Edith.', time: '11:20 AM', date: 'Jun 18, 2025' },
-  { name: 'Justin Case', role: 'Founder', company: '@Shopify', companyColor: COMPANY_ORANGE, initials: 'JC', quote: 'Le multi-format en un export, ça change tout pour scaler.', time: '9:12 AM', date: 'Jun 15, 2025' },
-  { name: 'Sarah Leeman', role: 'Growth Lead', company: '@Mailchimp', companyColor: COMPANY_GREEN, initials: 'SL', quote: 'Mes performances Meta Ads ont doublé en 30 jours.', time: '5:48 PM', date: 'Jun 24, 2025' },
-  { name: 'Amaya Locosta', role: 'Performance Marketing', company: '@Klaviyo', companyColor: COMPANY_RED, initials: 'AL', quote: 'Plus besoin de monteur freelance pour les variantes A/B.', time: '4:30 PM', date: 'Jun 22, 2025' },
-  { name: 'Justin Case', role: 'Marketing Leader', company: '@Shopify', companyColor: COMPANY_ORANGE, initials: 'JC', quote: 'Les sous-titres animés sont meilleurs que ce que je faisais manuellement.', time: '2:15 PM', date: 'Jun 19, 2025' },
-  { name: 'Amaya Locosta', role: 'Creative Director', company: '@Klaviyo', companyColor: COMPANY_RED, initials: 'AL', quote: 'L\'IA comprend vraiment le brief. Du premier coup.', time: '10:05 AM', date: 'Jun 21, 2025' },
-  { name: 'Justin Case', role: 'E-commerce Manager', company: '@Shopify', companyColor: COMPANY_ORANGE, initials: 'JC', quote: 'Format 9:16, 1:1, 16:9 en simultané. Mes équipes social et paid travaillent enfin sur les mêmes assets.', time: '1:22 PM', date: 'Jun 17, 2025' },
-  { name: 'Sarah Leeman', role: 'Brand Lead', company: '@Mailchimp', companyColor: COMPANY_GREEN, initials: 'SL', quote: 'Le rendu broadcast quality m\'évite l\'étape étalonnage. Direct prêt à publier.', time: '8:40 AM', date: 'Jun 23, 2025' },
+  { name: 'Sarah Leeman', role: 'Marketing Leader', company: '@Mailchimp', companyColor: COMPANY_GREEN, initials: 'SL', quoteKey: 'testimonials.q1', time: '3:45 PM', date: 'Jun 20, 2025' },
+  { name: 'Amaya Locosta', role: 'Media Buyer', company: '@Klaviyo', companyColor: COMPANY_RED, initials: 'AL', quoteKey: 'testimonials.q2', time: '11:20 AM', date: 'Jun 18, 2025' },
+  { name: 'Justin Case', role: 'Founder', company: '@Shopify', companyColor: COMPANY_ORANGE, initials: 'JC', quoteKey: 'testimonials.q3', time: '9:12 AM', date: 'Jun 15, 2025' },
+  { name: 'Sarah Leeman', role: 'Growth Lead', company: '@Mailchimp', companyColor: COMPANY_GREEN, initials: 'SL', quoteKey: 'testimonials.q4', time: '5:48 PM', date: 'Jun 24, 2025' },
+  { name: 'Amaya Locosta', role: 'Performance Marketing', company: '@Klaviyo', companyColor: COMPANY_RED, initials: 'AL', quoteKey: 'testimonials.q5', time: '4:30 PM', date: 'Jun 22, 2025' },
+  { name: 'Justin Case', role: 'Marketing Leader', company: '@Shopify', companyColor: COMPANY_ORANGE, initials: 'JC', quoteKey: 'testimonials.q6', time: '2:15 PM', date: 'Jun 19, 2025' },
+  { name: 'Amaya Locosta', role: 'Creative Director', company: '@Klaviyo', companyColor: COMPANY_RED, initials: 'AL', quoteKey: 'testimonials.q7', time: '10:05 AM', date: 'Jun 21, 2025' },
+  { name: 'Justin Case', role: 'E-commerce Manager', company: '@Shopify', companyColor: COMPANY_ORANGE, initials: 'JC', quoteKey: 'testimonials.q8', time: '1:22 PM', date: 'Jun 17, 2025' },
+  { name: 'Sarah Leeman', role: 'Brand Lead', company: '@Mailchimp', companyColor: COMPANY_GREEN, initials: 'SL', quoteKey: 'testimonials.q9', time: '8:40 AM', date: 'Jun 23, 2025' },
 ];
 
-const TestimonialCard: React.FC<{ t: Testimonial }> = ({ t }) => (
+const TestimonialCard: React.FC<{ item: Testimonial }> = ({ item }) => {
+  const t = useT();
+  return (
   <div
     className="flex flex-col"
     style={{
@@ -73,7 +84,7 @@ const TestimonialCard: React.FC<{ t: Testimonial }> = ({ t }) => (
         style={{ borderRadius: '99px', width: '40px', height: '40px', backgroundColor: 'rgba(255,255,255,0.06)' }}
       >
         <span style={{ fontSize: '13px', fontWeight: 600, color: 'rgba(255,255,255,0.5)' }}>
-          {t.initials}
+          {item.initials}
         </span>
       </div>
       <div>
@@ -86,7 +97,7 @@ const TestimonialCard: React.FC<{ t: Testimonial }> = ({ t }) => (
             letterSpacing: '-0.09px',
           }}
         >
-          {t.name}
+          {item.name}
         </div>
         <div
           style={{
@@ -96,7 +107,7 @@ const TestimonialCard: React.FC<{ t: Testimonial }> = ({ t }) => (
             letterSpacing: '0.01px',
           }}
         >
-          {t.role} <span style={{ color: t.companyColor }}>{t.company}</span>
+          {item.role} <span style={{ color: item.companyColor }}>{item.company}</span>
         </div>
       </div>
     </div>
@@ -111,21 +122,22 @@ const TestimonialCard: React.FC<{ t: Testimonial }> = ({ t }) => (
         margin: 0,
       }}
     >
-      &ldquo;{t.quote}&rdquo;
+      &ldquo;{t(item.quoteKey)}&rdquo;
     </p>
 
     {/* Date */}
     <div className="flex items-center" style={{ gap: '2px', color: '#ffffff7a' }}>
       <span style={{ fontFamily: 'var(--font-space-grotesk), sans-serif', fontSize: '12px', lineHeight: 1.7, letterSpacing: '0.01px' }}>
-        {t.time}
+        {item.time}
       </span>
       <span style={{ width: '18px', fontSize: '12px', textAlign: 'center' }}>·</span>
       <span style={{ fontFamily: 'var(--font-space-grotesk), sans-serif', fontSize: '12px', lineHeight: 1.7, letterSpacing: '0.01px' }}>
-        {t.date}
+        {item.date}
       </span>
     </div>
   </div>
-);
+  );
+};
 
 type MarqueeColumnProps = {
   items: Testimonial[];
@@ -146,8 +158,8 @@ const MarqueeColumn: React.FC<MarqueeColumnProps> = ({ items, direction, duratio
         animate={{ y: animateY }}
         transition={{ duration, ease: 'linear', repeat: Infinity }}
       >
-        {doubled.map((t, i) => (
-          <TestimonialCard key={i} t={t} />
+        {doubled.map((item, i) => (
+          <TestimonialCard key={i} item={item} />
         ))}
       </motion.div>
     </div>
@@ -155,6 +167,7 @@ const MarqueeColumn: React.FC<MarqueeColumnProps> = ({ items, direction, duratio
 };
 
 export const TestimonialsSection: React.FC = () => {
+  const t = useT();
   // Split 9 testimonials across 3 columns (3 each)
   const col1 = TESTIMONIALS.slice(0, 3);
   const col2 = TESTIMONIALS.slice(3, 6);
@@ -190,7 +203,7 @@ export const TestimonialsSection: React.FC = () => {
               }}
             >
               <Sparkles className="size-5 text-edith-accent" strokeWidth={1.5} />
-              Edith Product Overview
+              {t('testimonials.badge')}
             </span>
           </motion.div>
 
@@ -209,7 +222,7 @@ export const TestimonialsSection: React.FC = () => {
               backgroundClip: 'text',
             }}
           >
-            Écoutez l'avis de nos utilisateurs
+            {t('testimonials.title')}
           </motion.h2>
 
           <motion.p
@@ -222,7 +235,7 @@ export const TestimonialsSection: React.FC = () => {
               letterSpacing: '-0.01em',
             }}
           >
-            Des e-commerçants, media buyers et créateurs UGC partagent leurs résultats avec Edith.
+            {t('testimonials.subtitle')}
           </motion.p>
 
           {/* Stats */}
@@ -271,7 +284,7 @@ export const TestimonialsSection: React.FC = () => {
                       letterSpacing: '-0.01em',
                     }}
                   >
-                    {stat.label}
+                    {t(stat.labelKey)}
                   </p>
                 </motion.div>
               );

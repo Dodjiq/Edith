@@ -3,6 +3,7 @@
 import { motion } from 'motion/react';
 import { Container } from '@/components/shared/container';
 import { fadeUp, staggerContainer } from '@/lib/motion';
+import { useT } from '@/i18n/locale-context';
 
 const ROW_1 = [
   { name: 'upgrade', weight: 600 },
@@ -66,7 +67,9 @@ const MarqueeRow: React.FC<MarqueeRowProps> = ({ items, direction, duration = 40
   );
 };
 
-export const LogoCloud: React.FC = () => (
+export const LogoCloud: React.FC = () => {
+  const t = useT();
+  return (
   <section className="relative bg-edith-bg pt-24 pb-16 sm:pt-32 sm:pb-24">
     <Container>
       <motion.div
@@ -88,7 +91,7 @@ export const LogoCloud: React.FC = () => (
             color: '#ffffff',
           }}
         >
-          Les meilleures équipes e-commerce font confiance à Edith.
+          {t('logoCloud.title')}
         </motion.h2>
       </motion.div>
     </Container>
@@ -138,8 +141,9 @@ export const LogoCloud: React.FC = () => (
           letterSpacing: '-0.01em',
         }}
       >
-        Utilisé par des e-commerçants partout dans le monde.
+        {t('logoCloud.tagline')}
       </motion.p>
     </Container>
   </section>
-);
+  );
+};
